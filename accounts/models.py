@@ -2,23 +2,42 @@ from django.contrib.auth.base_user import AbstractBaseUser, BaseUserManager
 from django.db import models
 from django.urls import reverse
 
+from msg_sender.models import Channel, NTF_type_for_channel
 
-class RegForm(models.Model):
-    slug = models.SlugField(max_length=255, verbose_name='адрес', unique=True, null=True, blank=True)
+
+class Employee(models.Model):
     email = models.EmailField(max_length=256, verbose_name='почта')
-    tg_nickname = models.CharField(max_length=50, verbose_name='tg_nickname', null=True)
-    tg_channel = models.CharField(max_length=50, verbose_name='tg_channel', null=True)
-    # receiver = models.CharField(max_length=50, verbose_name='receiver', null=True)
+    receiver = models.BooleanField(max_length=50, verbose_name='want_to_receive', null=True)
     password = models.CharField(max_length=256, verbose_name='password')
     repeat_password = models.CharField(max_length=256, verbose_name='repeat-password')
-    # get_service = models.ManyToManyField(Service)
 
     def __str__(self):
         return self.email
 
-    def get_absolute_url(self):
-        return reverse('RegForm', kwargs={'slug': self.slug})
 
+class Empl_requisites(models.Model):
+    employee = models.ForeignKey(Employee, verbose_name='employee', on_delete=models.CASCADE, blank=True)
+    channel = models.ForeignKey(Channel, verbose_name='employee', on_delete=models.CASCADE, blank=True)
+    slug = models.SlugField(max_length=255, verbose_name='адрес', unique=True, null=True, blank=True)
+    tg_nickname = models.CharField(max_length=50, verbose_name='tg_nickname', null=True)
+    tg_channel = models.CharField(max_length=50, verbose_name='tg_channel', null=True)
+    phone_number = models.CharField(max_length=50, verbose_name='tg_channel', null=True)
+
+    def __str__(self):
+        return self.tg_nickname
+
+    def get_absolute_url(self):
+        return reverse('Empl_requisites', kwargs={'slug': self.slug})
+
+
+class Subscription(models.Model):
+    slug = models.SlugField(max_length=255, verbose_name='адрес', unique=True, null=True, blank=True)
+    channel = models.ForeignKey(Channel, verbose_name='employee', on_delete=models.CASCADE, blank=True)
+    employee_requisites = models.ForeignKey(Empl_requisites, verbose_name='employee',
+                                            on_delete=models.CASCADE, blank=True)
+
+    def __str__(self):
+        return self.slug
 
 
 class MyUserManager(BaseUserManager):
@@ -50,7 +69,6 @@ class MyUserManager(BaseUserManager):
         return user
 
 
-
 class MyUser(AbstractBaseUser):
     email = models.EmailField(
         verbose_name='email address',
@@ -69,8 +87,6 @@ class MyUser(AbstractBaseUser):
 
     def __str__(self):
         return self.email
-
-
 
     def has_perm(self, perm, obj=None):
         """проверяет есть ли у пользователя указанное разрешение """
