@@ -75,6 +75,8 @@ class MyUser(AbstractBaseUser):
         max_length=255,
         unique=True,
     )
+
+    receiver = models.BooleanField(default=True)
     is_active = models.BooleanField(default=True)
     is_admin = models.BooleanField(default=False)
     send_to_email = models.BooleanField(default=True)

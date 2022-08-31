@@ -4,7 +4,7 @@ from django.contrib.auth.models import Group
 from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
 from django.contrib.auth.forms import ReadOnlyPasswordHashField
 
-from .models import MyUser
+from .models import MyUser, Empl_requisites, Subscription
 
 
 class UserCreationForm(forms.ModelForm):
@@ -56,7 +56,8 @@ class UserAdmin(BaseUserAdmin):
     form = UserChangeForm
     add_form = UserCreationForm
 
-    list_display = ('email', 'is_admin', 'send_to_tg_channel', 'send_to_tg_privet_channel', 'send_to_email')
+    list_display = ('email', 'is_admin', 'receiver',
+                    'send_to_tg_channel', 'send_to_tg_privet_channel', 'send_to_email')
     list_filter = ('is_admin',)
     fieldsets = (
         # Поля для Отображения в админке
@@ -77,5 +78,7 @@ class UserAdmin(BaseUserAdmin):
 
 
 admin.site.register(MyUser, UserAdmin)
+admin.site.register(Empl_requisites)
+admin.site.register(Subscription)
 """ отмена регистрацию модели группы от администратора"""
 admin.site.unregister(Group)
