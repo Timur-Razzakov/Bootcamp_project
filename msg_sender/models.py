@@ -5,6 +5,7 @@ from django.core import validators
 
 class Service(models.Model):
     name = models.CharField(verbose_name='service_name', max_length=255)
+    image = models.ImageField(verbose_name=' images', upload_to='media/%Y/%m/%d', blank=True)
     description = models.CharField(verbose_name='description', max_length=255)
 
     def __str__(self):
@@ -16,7 +17,7 @@ class Notification_group(models.Model):
     description = models.CharField(verbose_name='description_ntf', max_length=255)
 
     def __str__(self):
-        return self.service_name
+        return self.description
 
 
 class Channel(models.Model):

@@ -2,11 +2,12 @@ from django.contrib.auth.base_user import AbstractBaseUser, BaseUserManager
 from django.db import models
 from django.urls import reverse
 
-from msg_sender.models import Channel, NTF_type_for_channel
+from msg_sender.models import Service, Channel, NTF_type_for_channel
 
 
 class Employee(models.Model):
     email = models.EmailField(max_length=256, verbose_name='почта')
+    service = models.ManyToManyField(Service)
     receiver = models.BooleanField(max_length=50, verbose_name='want_to_receive', null=True)
     password = models.CharField(max_length=256, verbose_name='password')
     repeat_password = models.CharField(max_length=256, verbose_name='repeat-password')

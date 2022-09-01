@@ -34,25 +34,27 @@ class UserLoginForm(forms.Form):
 class UserRegistrationForm(forms.ModelForm):
     email = forms.EmailField(label='Введите email',
                              widget=forms.EmailInput(attrs={'class': 'form-control'}))
-    tg_nickname = forms.EmailField(label='Введите Имя телеграмм аккаунта, для получения уведомлений',
-                                   widget=forms.EmailInput(attrs={'class': 'form-control'}))
-    tg_channel = forms.EmailField(label='Введите Канал, на который хотите отправлять уведомление (тг)',
-                                  widget=forms.EmailInput(attrs={'class': 'form-control'}))
+    tg_nickname = forms.CharField(label='Введите Имя телеграмм аккаунта, для получения уведомлений',
+                                   widget=forms.TextInput(attrs={'class': 'form-control'}))
+    tg_channel = forms.CharField(label='Введите Канал, на который хотите отправлять уведомление (тг)',
+                                  widget=forms.TextInput(attrs={'class': 'form-control'}))
+
     password = forms.CharField(label='Введите пароль',
                                widget=forms.PasswordInput(attrs={'class': 'form-control'}))
     password2 = forms.CharField(label='Введите пароль ещё раз',
                                 widget=forms.PasswordInput(attrs={'class': 'form-control'}))
-
+    receiver = forms.BooleanField(required=False, widget=forms.CheckboxInput,
+                                  label='Хотите ли вы получать рассылку?')
     send_to_email = forms.BooleanField(required=False, widget=forms.CheckboxInput,
                                        label='Получать рассылку на почту?')
     send_to_tg_channel = forms.BooleanField(required=False, widget=forms.CheckboxInput,
                                             label='Получать рассылку на канал? (тг)')
     send_to_tg_privet_channel = forms.BooleanField(required=False, widget=forms.CheckboxInput,
-                                                label='Получать рассылку в личку (тг)?')
+                                                   label='Получать рассылку в личку (тг)?')
 
     class Meta:
         model = User
-        fields = ('email', 'tg_nickname', 'tg_channel', 'password', 'password2',
+        fields = ('email', 'tg_nickname', 'tg_channel', 'password', 'password2', "receiver",
                   'send_to_email', 'send_to_tg_channel', 'send_to_tg_privet_channel')
 
     def clean_password2(self):
