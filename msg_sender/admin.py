@@ -16,12 +16,11 @@ class ServiceForm(forms.ModelForm):
 
 class ServiceAdmin(admin.ModelAdmin):
     form = ServiceForm
-    list_display = ('name', 'image', 'description')
+    list_display = ('service_names', 'image', 'description')
 
 
 class NotificationForm(forms.ModelForm):
     message = forms.CharField(widget=CKEditorUploadingWidget())
-
     class Meta:
         model = Notification
         fields = '__all__'
@@ -29,8 +28,10 @@ class NotificationForm(forms.ModelForm):
 
 class NotificationAdmin(admin.ModelAdmin):
     form = NotificationForm
-    list_display = ('title', 'status', 'channel_name',
-                    'ntf_group', 'url', 'receiver', 'message', 'created_at')
+    list_display = ('title', 'status','email',
+                    'url', 'message', 'created_at')
+
+
 
 
 admin.site.register(Service, ServiceAdmin)

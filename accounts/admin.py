@@ -34,10 +34,6 @@ class UserCreationForm(forms.ModelForm):
 
 
 class UserChangeForm(forms.ModelForm):
-    """A form for updating users. Includes all the fields on
-    the user, but replaces the password field with admin's
-    disabled password hash display field.
-    """
     password = ReadOnlyPasswordHashField()
 
     class Meta:
@@ -56,15 +52,23 @@ class UserAdmin(BaseUserAdmin):
     form = UserChangeForm
     add_form = UserCreationForm
 
-    list_display = ('email', 'is_admin', 'receiver',
-                    'send_to_tg_channel', 'send_to_tg_privet_channel', 'send_to_email')
+    list_display = ('email', 'is_admin', 'receiver', 'get_channels', 'get_services')
     list_filter = ('is_admin',)
     fieldsets = (
         # Поля для Отображения в админке
         (None, {'fields': ('email', 'password')}),
-        ('Subscription', {'fields': ('send_to_tg_channel', 'send_to_tg_privet_channel', 'send_to_email')}),
+        ('Send massage to...',
+         {'fields': ('receiver', 'channel', 'service')}),
         ('Permissions', {'fields': ('is_admin',)}),
     )
+    """ Поля ManyToManyField не поддерживаются, поэтому создал эту функцию, по другому не знаю как поступить"""
+
+    def get_channels(self, obj):
+        return "\n".join([ch.channels for ch in obj.channel.all()])
+
+    def get_services(self, obj):
+        return "\n".join([s.service_names for s in obj.service.all()])
+
     """ Поля которые будут использоваться при создании пользователя """
     add_fieldsets = (
         (None, {

@@ -3,6 +3,9 @@ from django.contrib.auth import get_user_model, authenticate
 from django.contrib.auth.hashers import check_password
 from django.contrib.auth.models import User
 
+from msg_sender.models import Channel, Service
+from .models import Empl_requisites
+
 # from service.scraping.models import City, Speciality
 
 User = get_user_model()
@@ -34,28 +37,37 @@ class UserLoginForm(forms.Form):
 class UserRegistrationForm(forms.ModelForm):
     email = forms.EmailField(label='Введите email',
                              widget=forms.EmailInput(attrs={'class': 'form-control'}))
-    tg_nickname = forms.CharField(label='Введите Имя телеграмм аккаунта, для получения уведомлений',
-                                   widget=forms.TextInput(attrs={'class': 'form-control'}))
-    tg_channel = forms.CharField(label='Введите Канал, на который хотите отправлять уведомление (тг)',
-                                  widget=forms.TextInput(attrs={'class': 'form-control'}))
-
     password = forms.CharField(label='Введите пароль',
                                widget=forms.PasswordInput(attrs={'class': 'form-control'}))
     password2 = forms.CharField(label='Введите пароль ещё раз',
                                 widget=forms.PasswordInput(attrs={'class': 'form-control'}))
     receiver = forms.BooleanField(required=False, widget=forms.CheckboxInput,
-                                  label='Хотите ли вы получать рассылку?')
-    send_to_email = forms.BooleanField(required=False, widget=forms.CheckboxInput,
-                                       label='Получать рассылку на почту?')
-    send_to_tg_channel = forms.BooleanField(required=False, widget=forms.CheckboxInput,
-                                            label='Получать рассылку на канал? (тг)')
-    send_to_tg_privet_channel = forms.BooleanField(required=False, widget=forms.CheckboxInput,
-                                                   label='Получать рассылку в личку (тг)?')
+                                  label='Хотите ли вы получать уведомления?')
+    channel = forms.ModelMultipleChoiceField(
+        queryset=Channel.objects.all(),
+        to_field_name="channels",
+        required=True,
+        widget=forms.Select(attrs={'class': 'form-control'}),
+        label='Выберите каналы, на которые хотите получать уведомления'
+    )
+    service = forms.ModelMultipleChoiceField(
+        queryset=Service.objects.all(),
+        to_field_name="service_names",
+        required=True,
+        widget=forms.Select(attrs={'class': 'form-control'}),
+        label='Выберите сервис, от которого хотите получать уведомления'
+    )
+
+    # send_to_email = forms.BooleanField(required=False, widget=forms.CheckboxInput,
+    #                                    label='Получать рассылку на почту?')
+    # send_to_tg_channel = forms.BooleanField(required=False, widget=forms.CheckboxInput,
+    #                                         label='Получать рассылку на канал? (тг)')
+    # send_to_tg_privet_channel = forms.BooleanField(required=False, widget=forms.CheckboxInput,
+    #                                                label='Получать рассылку в личку (тг)?')
 
     class Meta:
         model = User
-        fields = ('email', 'tg_nickname', 'tg_channel', 'password', 'password2', "receiver",
-                  'send_to_email', 'send_to_tg_channel', 'send_to_tg_privet_channel')
+        fields = ('email', 'password', 'password2', 'channel', 'service', "receiver",)
 
     def clean_password2(self):
         data = self.cleaned_data
@@ -64,3 +76,18 @@ class UserRegistrationForm(forms.ModelForm):
         return data['password2']
 
 
+"""Форма для получения реквизитов пользователя"""
+
+
+class UserRequisitesForm(forms.ModelForm):
+    tg_nickname = forms.CharField(label='Введите Имя телеграмм аккаунта, для получения уведомлений',
+                                  widget=forms.TextInput(attrs={'class': 'form-control'}))
+    tg_channel = forms.CharField(label='Введите Канал, на который хотите получать уведомление (тг)',
+                                 widget=forms.TextInput(attrs={'class': 'form-control'}))
+    phone_number = forms.CharField(
+        label='Введите номер телефона, на который хотите получать уведомление (тг)',
+        widget=forms.TextInput(attrs={'class': 'form-control'}))
+
+    class Meta:
+        model = Empl_requisites
+        fields = ('tg_nickname', 'tg_channel', 'phone_number')

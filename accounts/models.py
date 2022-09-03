@@ -5,34 +5,31 @@ from django.urls import reverse
 from msg_sender.models import Service, Channel, NTF_type_for_channel
 
 
-class Employee(models.Model):
-    email = models.EmailField(max_length=256, verbose_name='почта')
-    service = models.ManyToManyField(Service)
-    receiver = models.BooleanField(max_length=50, verbose_name='want_to_receive', null=True)
-    password = models.CharField(max_length=256, verbose_name='password')
-    repeat_password = models.CharField(max_length=256, verbose_name='repeat-password')
-
-    def __str__(self):
-        return self.email
+# class Employee(models.Model):
+#     email = models.EmailField(max_length=256, verbose_name='почта')
+#     service = models.ManyToManyField(Service)
+#     receiver = models.BooleanField(max_length=50, verbose_name='want_to_receive', null=True)
+#     password = models.CharField(max_length=256, verbose_name='password')
+#     repeat_password = models.CharField(max_length=256, verbose_name='repeat-password')
+#
+#     def __str__(self):
+#         return self.email
 
 
 class Empl_requisites(models.Model):
-    employee = models.ForeignKey(Employee, verbose_name='employee', on_delete=models.CASCADE, blank=True)
-    channel = models.ForeignKey(Channel, verbose_name='employee', on_delete=models.CASCADE, blank=True)
-    slug = models.SlugField(max_length=255, verbose_name='адрес', unique=True, null=True, blank=True)
+    employee = models.ForeignKey('MyUser', verbose_name='employee', on_delete=models.CASCADE, blank=True)
     tg_nickname = models.CharField(max_length=50, verbose_name='tg_nickname', null=True)
     tg_channel = models.CharField(max_length=50, verbose_name='tg_channel', null=True)
-    phone_number = models.CharField(max_length=50, verbose_name='tg_channel', null=True)
+    phone_number = models.CharField(max_length=50, verbose_name='phone_number', null=True)
 
     def __str__(self):
-        return self.tg_nickname
-
-    def get_absolute_url(self):
-        return reverse('Empl_requisites', kwargs={'slug': self.slug})
+        return str(self.employee)
 
 
 class Subscription(models.Model):
     slug = models.SlugField(max_length=255, verbose_name='адрес', unique=True, null=True, blank=True)
+    employee = models.ManyToManyField('MyUser')
+    service_name = models.ManyToManyField(Service)
     channel = models.ForeignKey(Channel, verbose_name='employee', on_delete=models.CASCADE, blank=True)
     employee_requisites = models.ForeignKey(Empl_requisites, verbose_name='employee',
                                             on_delete=models.CASCADE, blank=True)
@@ -76,17 +73,16 @@ class MyUser(AbstractBaseUser):
         max_length=255,
         unique=True,
     )
-
     receiver = models.BooleanField(default=True)
     is_active = models.BooleanField(default=True)
     is_admin = models.BooleanField(default=False)
-    send_to_email = models.BooleanField(default=True)
-    send_to_tg_channel = models.BooleanField(default=True)
-    send_to_tg_privet_channel = models.BooleanField(default=True)
+    channel = models.ManyToManyField(Channel, verbose_name='channel_name')
+    service = models.ManyToManyField(Service, verbose_name='service_name')
     objects = MyUserManager()
 
     USERNAME_FIELD = 'email'
     REQUIRED_FIELDS = []
+
 
     def __str__(self):
         return self.email
