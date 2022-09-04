@@ -34,6 +34,7 @@ class Notification(models.Model):
                                   blank=True, null=True)
     email = models.EmailField(verbose_name='email address', max_length=255,
                               unique=True, )
+
     url = models.CharField(verbose_name='url', max_length=30)
     message = models.CharField(verbose_name='Message', max_length=255)
     created_at = models.DateTimeField(verbose_name=("created_at"), auto_now_add=True)

@@ -30,8 +30,8 @@ class Subscription(models.Model):
     slug = models.SlugField(max_length=255, verbose_name='адрес', unique=True, null=True, blank=True)
     employee = models.ManyToManyField('MyUser')
     service_name = models.ManyToManyField(Service)
-    channel = models.ForeignKey(Channel, verbose_name='employee', on_delete=models.CASCADE, blank=True)
-    employee_requisites = models.ForeignKey(Empl_requisites, verbose_name='employee',
+    channel = models.ForeignKey(Channel, verbose_name='channels', on_delete=models.CASCADE, blank=True)
+    employee_requisites = models.ForeignKey(Empl_requisites, verbose_name='employee_requisites',
                                             on_delete=models.CASCADE, blank=True)
 
     def __str__(self):
@@ -76,8 +76,9 @@ class MyUser(AbstractBaseUser):
     receiver = models.BooleanField(default=True)
     is_active = models.BooleanField(default=True)
     is_admin = models.BooleanField(default=False)
-    channel = models.ManyToManyField(Channel, verbose_name='channel_name')
-    service = models.ManyToManyField(Service, verbose_name='service_name')
+    channel = models.ManyToManyField(Channel, verbose_name='channel_name', null=True)
+    service = models.ManyToManyField(Service, verbose_name='service_name', null=True)
+
     objects = MyUserManager()
 
     USERNAME_FIELD = 'email'
