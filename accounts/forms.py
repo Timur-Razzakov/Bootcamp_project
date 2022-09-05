@@ -78,12 +78,12 @@ class UserRegistrationForm(forms.ModelForm):
 
 
 class UserRequisitesForm(forms.ModelForm):
-    employee = forms.ModelMultipleChoiceField(
-        queryset=MyUser.objects.all(),
-        required=True,
-        widget=forms.Select(attrs={'class': 'form-control'}),
-        label='employee'
-    )
+    # employee = forms.ModelMultipleChoiceField(
+    #     queryset=MyUser.objects.all(),
+    #     required=True,
+    #     widget=forms.Select(attrs={'class': 'form-control'}),
+    #     label='employee'
+    # )
     tg_nickname = forms.CharField(label='Введите Имя телеграмм аккаунта, для получения уведомлений',
                                   widget=forms.TextInput(attrs={'class': 'form-control'}))
     tg_channel = forms.CharField(label='Введите Канал, на который хотите получать уведомление (тг)',
@@ -94,4 +94,4 @@ class UserRequisitesForm(forms.ModelForm):
 
     class Meta:
         model = Empl_requisites
-        fields = ('employee','tg_nickname', 'tg_channel', 'phone_number')
+        fields = ('tg_nickname', 'tg_channel', 'phone_number') #'employee',

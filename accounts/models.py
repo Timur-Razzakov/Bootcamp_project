@@ -28,11 +28,14 @@ class Empl_requisites(models.Model):
 
 class Subscription(models.Model):
     slug = models.SlugField(max_length=255, verbose_name='адрес', unique=True, null=True, blank=True)
-    employee = models.ManyToManyField('MyUser')
-    service_name = models.ManyToManyField(Service)
-    channel = models.ForeignKey(Channel, verbose_name='channels', on_delete=models.CASCADE, blank=True)
-    employee_requisites = models.ForeignKey(Empl_requisites, verbose_name='employee_requisites',
-                                            on_delete=models.CASCADE, blank=True)
+    employee = models.ForeignKey('MyUser', verbose_name='employee', on_delete=models.CASCADE, null=True,
+                                 blank=True)
+    service_name = models.ManyToManyField(Service,null=True,
+                                 blank=True)
+    channel = models.ForeignKey(Channel, verbose_name='channels', on_delete=models.CASCADE, null=True,
+                                blank=True)
+    employee_requisites = models.ManyToManyField(Empl_requisites,null=True,
+                                 blank=True)
 
     def __str__(self):
         return self.slug
@@ -83,7 +86,6 @@ class MyUser(AbstractBaseUser):
 
     USERNAME_FIELD = 'email'
     REQUIRED_FIELDS = []
-
 
     def __str__(self):
         return self.email

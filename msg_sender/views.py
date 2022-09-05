@@ -59,7 +59,7 @@ ADMIN_USER = EMAIL_HOST_USER
 def receive(request):
     if request.method == "POST":
         data = json.loads(request.body.decode())
-        qs = User.objects.filter(receiver=True).values('email', 'channel', 'service')
+        qs = User.objects.filter(receiver=True ).values('email', 'channel', 'service')
         print(len(qs))
         user_dict = {}
         for item in qs:

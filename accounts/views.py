@@ -5,7 +5,7 @@ from django.contrib import messages
 from accounts.forms import UserLoginForm, UserRegistrationForm, UserRequisitesForm
 
 User = get_user_model()
-
+from .models import Empl_requisites,Subscription
 """Функция для авторизации"""
 
 
@@ -17,7 +17,7 @@ def login_view(request):
         password = data.get('password')
         user = authenticate(request, email=email, password=password)
         login(request, user)
-        return redirect('home')
+        return redirect('user_requisites')
     return render(request, 'accounts/login.html', {'form': form})
 
 
@@ -43,7 +43,7 @@ def register_view(request):
         messages.success(request, 'Пользователь добавлен в систему.')
         return render(request, 'accounts/login.html',
                       {'new_user': new_user, })
-    return render(request, 'accounts/registration.html', {'form': form, 'requisites_form': requisites_form})
+    return render(request, 'accounts/registration.html', {'form': form,})
 
 
 """ Функция для получения реквизитов пользователя """
@@ -52,18 +52,31 @@ def register_view(request):
 def requisites_view(request):
     form = UserRequisitesForm(request.POST or None)
     if form.is_valid():
+        email = User.objects.get(logentry=True)
+        print(email)
         user_requisites = form.save(commit=False)
         data = form.cleaned_data
-        user_requisites.employee = data['email']
+        user_requisites.employee = email
         user_requisites.tg_nickname = data['tg_nickname']
         user_requisites.tg_channel = data['tg_channel']
         user_requisites.phone_number = data['phone_number']
         user_requisites.save()
-        return render(request, 'accounts/login.html',
+        return render(request, 'msg_sender/home.html',
                       {'user_requisites': user_requisites, })
-    return render(request, 'accounts/registration.html', {'form': form,})
+    return render(request, 'accounts/get_user_requisites.html', {'form': form,})
+
+
+# def subscription_view(request):
+# #   emp_requisites = Empl_requisites.objects.get(emp_requisites=data["email"])
+# #   subsc = Subscription.objects.create()
+#     subsc.employee=data['email']
+#     subsc.service_name = data['service']
+#     subsc.channel = data['channel']
+#     subsc.employee_requisites = emp_requisites
+#
 
 # """
+
 # Функция для обновлений данных указанных ранее
 # """
 #
