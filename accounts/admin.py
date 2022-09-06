@@ -52,7 +52,7 @@ class UserAdmin(BaseUserAdmin):
     form = UserChangeForm
     add_form = UserCreationForm
 
-    list_display = ('email', 'is_admin', 'receiver', 'get_channels', 'get_services')
+    list_display = ('email', 'is_admin', 'receiver', 'channel','service')
     list_filter = ('is_admin',)
     fieldsets = (
         # Поля для Отображения в админке
@@ -63,11 +63,11 @@ class UserAdmin(BaseUserAdmin):
     )
     """ Поля ManyToManyField не поддерживаются, поэтому создал эту функцию, по другому не знаю как поступить"""
 
-    def get_channels(self, obj):
-        return "\n".join([ch.channels for ch in obj.channel.all()])
-
-    def get_services(self, obj):
-        return "\n".join([s.service_names for s in obj.service.all()])
+    # def get_channels(self, obj):
+    #     return "\n".join([ch.channels for ch in obj.channel.all()])
+    #
+    # def get_services(self, obj):
+    #     return "\n".join([s.service_names for s in obj.service.all()])
 
     """ Поля которые будут использоваться при создании пользователя """
     add_fieldsets = (

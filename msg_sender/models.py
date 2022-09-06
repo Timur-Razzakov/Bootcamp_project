@@ -22,6 +22,7 @@ class Channel(models.Model):
 class Notification_group(models.Model):
     service_name = models.ForeignKey(Service, verbose_name='service', on_delete=models.CASCADE, blank=True)
     description = models.CharField(verbose_name='description_ntf', max_length=255)
+    # group_name = models.CharField(verbose_name='description_ntf', max_length=255)
 
     def __str__(self):
         return self.description

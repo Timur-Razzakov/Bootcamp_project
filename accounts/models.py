@@ -17,28 +17,30 @@ from msg_sender.models import Service, Channel, NTF_type_for_channel
 
 
 class Empl_requisites(models.Model):
-    employee = models.ForeignKey('MyUser', verbose_name='employee', on_delete=models.CASCADE, blank=True)
+    employee = models.ForeignKey('MyUser', verbose_name='employee', on_delete=models.CASCADE,unique=True, blank=True)
     tg_nickname = models.CharField(max_length=50, verbose_name='tg_nickname', null=True)
     tg_channel = models.CharField(max_length=50, verbose_name='tg_channel', null=True)
     phone_number = models.CharField(max_length=50, verbose_name='phone_number', null=True)
 
     def __str__(self):
-        return str(self.employee)
+        return self.phone_number
 
 
 class Subscription(models.Model):
     slug = models.SlugField(max_length=255, verbose_name='адрес', unique=True, null=True, blank=True)
-    employee = models.ForeignKey('MyUser', verbose_name='employee', on_delete=models.CASCADE, null=True,
+    employee = models.ForeignKey('MyUser', verbose_name='employee', on_delete=models.SET_NULL, null=True,
                                  blank=True)
-    service_name = models.ManyToManyField(Service,null=True,
-                                 blank=True)
-    channel = models.ForeignKey(Channel, verbose_name='channels', on_delete=models.CASCADE, null=True,
-                                blank=True)
-    employee_requisites = models.ManyToManyField(Empl_requisites,null=True,
-                                 blank=True)
-
+    service_name = models.ManyToManyField(Service)
+    channel = models.ManyToManyField(Channel)
+    employee_requisites = models.ManyToManyField(Empl_requisites)
+    # service_name = models.ForeignKey(Service, verbose_name='service_name', on_delete=models.CASCADE,
+    #                                  null=True,
+    #                                  blank=True)
+    # employee_requisites = models.ForeignKey(Empl_requisites, verbose_name='employee_requisites',
+    #                                         on_delete=models.CASCADE, null=True,
+    #                                         blank=True)
     def __str__(self):
-        return self.slug
+        return str(self.employee)
 
 
 class MyUserManager(BaseUserManager):
@@ -76,11 +78,16 @@ class MyUser(AbstractBaseUser):
         max_length=255,
         unique=True,
     )
-    receiver = models.BooleanField(default=True)
+
     is_active = models.BooleanField(default=True)
     is_admin = models.BooleanField(default=False)
-    channel = models.ManyToManyField(Channel, verbose_name='channel_name', null=True)
-    service = models.ManyToManyField(Service, verbose_name='service_name', null=True)
+    channel = models.ForeignKey(Channel, verbose_name='channel_name', on_delete=models.SET_NULL, null=True,
+                                blank=True)
+    service = models.ForeignKey(Service, verbose_name='service_name', on_delete=models.SET_NULL, null=True,
+                                blank=True)
+    receiver = models.BooleanField(default=True)
+    # channel = models.ManyToManyField(Channel, verbose_name='channel_name', null=True)
+    # service = models.ManyToManyField(Service, verbose_name='service_name', null=True)
 
     objects = MyUserManager()
 

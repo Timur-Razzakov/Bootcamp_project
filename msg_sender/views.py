@@ -36,44 +36,44 @@ User = get_user_model()
 ADMIN_USER = EMAIL_HOST_USER
 
 
-# @csrf_exempt
-# def receive(request):
-#     if request.method == "POST":
-#         data = json.loads(request.body.decode())
-#         ntf_group = Notification_group.objects.get(description=data["notification_group"])
-#         ntf = Notification.objects.create()
-#         ntf.title = data["title"]
-#         ntf.status = data["status"]
-#         ntf.url = data["url"]
-#         ntf.message = data["message"]
-#         ntf.created_at = data["created_at"]
-#         ntf.email = data["email"]
-#         ntf.ntf_group = ntf_group
-#
-#         ntf.save()
-#         messages.success(request, 'Данные сохранены.')
-#         return redirect('/')
-
-
 @csrf_exempt
 def receive(request):
     if request.method == "POST":
         data = json.loads(request.body.decode())
-        qs = User.objects.filter(receiver=True ).values('email', 'channel', 'service')
-        print(len(qs))
-        user_dict = {}
-        for item in qs:
-            print(item)
-        # ntf_group = Notification_group.objects.get(description=data["notification_group"])
-        # ntf = Notification.objects.create()
-        # ntf.title = data["title"]
-        # ntf.status = data["status"]
-        # ntf.url = data["url"]
-        # ntf.message = data["message"]
-        # ntf.created_at = data["created_at"]
-        # ntf.email = data["email"]
-        # ntf.ntf_group = ntf_group
+        ntf_group = Notification_group.objects.get(description=data["notification_group"])
+        ntf = Notification.objects.create()
+        ntf.title = data["title"]
+        ntf.status = data["status"]
+        ntf.url = data["url"]
+        ntf.message = data["message"]
+        ntf.created_at = data["created_at"]
+        ntf.email = data["email"]
+        ntf.ntf_group = ntf_group
 
-        # ntf.save()
+        ntf.save()
         messages.success(request, 'Данные сохранены.')
         return redirect('/')
+
+#
+# @csrf_exempt
+# def receive(request):
+#     if request.method == "POST":
+#         data = json.loads(request.body.decode())
+#         qs = User.objects.filter(receiver=True ).values('email', 'channel', 'service')
+#         print(len(qs))
+#         user_dict = {}
+#         for item in qs:
+#             print(item)
+#         # ntf_group = Notification_group.objects.get(description=data["notification_group"])
+#         # ntf = Notification.objects.create()
+#         # ntf.title = data["title"]
+#         # ntf.status = data["status"]
+#         # ntf.url = data["url"]
+#         # ntf.message = data["message"]
+#         # ntf.created_at = data["created_at"]
+#         # ntf.email = data["email"]
+#         # ntf.ntf_group = ntf_group
+#
+#         # ntf.save()
+#         messages.success(request, 'Данные сохранены.')
+#         return redirect('/')

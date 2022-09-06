@@ -3,9 +3,12 @@ from django.shortcuts import render, redirect
 from django.contrib.auth import authenticate, login, logout, get_user_model
 from django.contrib import messages
 from accounts.forms import UserLoginForm, UserRegistrationForm, UserRequisitesForm
+from msg_sender.models import Channel, Service
+from django.contrib.auth.decorators import login_required
 
 User = get_user_model()
-from .models import Empl_requisites,Subscription
+from .models import Empl_requisites, Subscription
+
 """Функция для авторизации"""
 
 
@@ -17,6 +20,7 @@ def login_view(request):
         password = data.get('password')
         user = authenticate(request, email=email, password=password)
         login(request, user)
+
         return redirect('user_requisites')
     return render(request, 'accounts/login.html', {'form': form})
 
@@ -37,23 +41,26 @@ def register_view(request):
     if form.is_valid():
         new_user = form.save(commit=False)  # instans) commit=False-->исп для полного соединения с базой
         data = form.cleaned_data
+        new_user.channel = data['channel']
+        new_user.service = data['service']
         new_user.set_password(form.cleaned_data['password'])  # ЗАШИФРОВЫВАЕТ пароль
         new_user.send_email = data['receiver']
         new_user.save()
         messages.success(request, 'Пользователь добавлен в систему.')
-        return render(request, 'accounts/login.html',
-                      {'new_user': new_user, })
-    return render(request, 'accounts/registration.html', {'form': form,})
+        return render(request, 'accounts/registered.html',  # 'accounts/login.html',
+                      {'new_user': new_user})
+    return render(request, 'accounts/registration.html', {'form': form})
 
 
 """ Функция для получения реквизитов пользователя """
 
 
+
+@login_required
 def requisites_view(request):
     form = UserRequisitesForm(request.POST or None)
     if form.is_valid():
-        email = User.objects.get(logentry=True)
-        print(email)
+        email = User.objects.get(email=request.user)
         user_requisites = form.save(commit=False)
         data = form.cleaned_data
         user_requisites.employee = email
@@ -62,20 +69,22 @@ def requisites_view(request):
         user_requisites.phone_number = data['phone_number']
         user_requisites.save()
         return render(request, 'msg_sender/home.html',
-                      {'user_requisites': user_requisites, })
-    return render(request, 'accounts/get_user_requisites.html', {'form': form,})
+                      {'user_requisites': user_requisites})
+    return render(request, 'accounts/get_user_requisites.html', {'form': form})
 
 
-# def subscription_view(request):
-# #   emp_requisites = Empl_requisites.objects.get(emp_requisites=data["email"])
-# #   subsc = Subscription.objects.create()
-#     subsc.employee=data['email']
-#     subsc.service_name = data['service']
-#     subsc.channel = data['channel']
-#     subsc.employee_requisites = emp_requisites
-#
+@login_required
+def subscription_View(request):
+    subsc = Subscription.objects.create()
+    user_data = User.objects.filter(email=request.user).values('id','email', 'service', 'channel')
+    for item in user_data:
+        subsc.employee = (User.objects.get(email=item['email']))
+        subsc.employee_requisites.add(Empl_requisites.objects.get(employee=item['id']))
+        subsc.channel.add(Channel.objects.get(id=item['channel']))
+        subsc.service_name.add(Service.objects.get(id=item['service']))
+    subsc.save()
 
-# """
+
 
 # Функция для обновлений данных указанных ранее
 # """
@@ -106,7 +115,6 @@ def requisites_view(request):
 #         return redirect('login')
 
 
-
 """Функция для удаления пользователя"""
 
 
@@ -118,4 +126,3 @@ def delete_view(request):
             qs.delete()
             messages.error(request, 'Пользователь удалён :(')
     return redirect('home')
-
