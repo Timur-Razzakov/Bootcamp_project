@@ -1,8 +1,7 @@
 from django.contrib.auth.base_user import AbstractBaseUser, BaseUserManager
 from django.db import models
-from django.urls import reverse
 
-from msg_sender.models import Service, Channel, NTF_type_for_channel
+from msg_sender.models import  Channel, NTF_type_for_channel,Notification_group
 
 
 # class Employee(models.Model):
@@ -27,10 +26,9 @@ class Empl_requisites(models.Model):
 
 
 class Subscription(models.Model):
-    slug = models.SlugField(max_length=255, verbose_name='адрес', unique=True, null=True, blank=True)
     employee = models.ForeignKey('MyUser', verbose_name='employee', on_delete=models.SET_NULL, null=True,
                                  blank=True)
-    service_name = models.ManyToManyField(Service)
+    notification_group = models.ManyToManyField(Notification_group)
     channel = models.ManyToManyField(Channel)
     employee_requisites = models.ManyToManyField(Empl_requisites)
     # service_name = models.ForeignKey(Service, verbose_name='service_name', on_delete=models.CASCADE,
@@ -81,14 +79,15 @@ class MyUser(AbstractBaseUser):
 
     is_active = models.BooleanField(default=True)
     is_admin = models.BooleanField(default=False)
-    channel = models.ForeignKey(Channel, verbose_name='channel_name', on_delete=models.SET_NULL, null=True,
-                                blank=True)
-    service = models.ForeignKey(Service, verbose_name='service_name', on_delete=models.SET_NULL, null=True,
-                                blank=True)
-    receiver = models.BooleanField(default=True)
-    # channel = models.ManyToManyField(Channel, verbose_name='channel_name', null=True)
-    # service = models.ManyToManyField(Service, verbose_name='service_name', null=True)
 
+    notification_group = models.ManyToManyField(Notification_group, verbose_name='notification_group')
+
+    channel = models.ManyToManyField(Channel, verbose_name='channel_name')
+    # channel = models.ForeignKey(Channel, verbose_name='channel_name', on_delete=models.SET_NULL, null=True,
+    #                             blank=True)
+    # notification_group = models.ForeignKey(Notification_group, verbose_name='notification_group', on_delete=models.SET_NULL, null=True,
+    #                             blank=True)
+    receiver = models.BooleanField(default=True)
     objects = MyUserManager()
 
     USERNAME_FIELD = 'email'

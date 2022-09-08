@@ -13,4 +13,4 @@ class NotificationForm(forms.Form):
 
     class Meta:
         model = Notification
-        fields = ('title', 'status', 'message', 'ntf_group', 'created_at', 'email', 'url',)
+        fields = ('title', 'status', 'message', 'ntf_group', 'created_at' 'url',)

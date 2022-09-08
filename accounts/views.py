@@ -1,9 +1,13 @@
 import datetime as dt
+
+from django.http import HttpResponseRedirect
 from django.shortcuts import render, redirect
 from django.contrib.auth import authenticate, login, logout, get_user_model
 from django.contrib import messages
+from icecream import ic
+
 from accounts.forms import UserLoginForm, UserRegistrationForm, UserRequisitesForm
-from msg_sender.models import Channel, Service
+from msg_sender.models import Channel, Service, Notification_group
 from django.contrib.auth.decorators import login_required
 
 User = get_user_model()
@@ -33,27 +37,29 @@ def logout_view(request):
     return redirect('home')
 
 
-""" Функция для создание нового пользователя """
+""" Функция для создание нового пользователя  """
+"""https://ru.stackoverflow.com/questions/739037/"""
 
 
 def register_view(request):
     form = UserRegistrationForm(request.POST or None)
     if form.is_valid():
-        new_user = form.save(commit=False)  # instans) commit=False-->исп для полного соединения с базой
+        new_user = form.save()  # instans) commit=False-->исп для полного соединения с базой
         data = form.cleaned_data
-        new_user.channel = data['channel']
-        new_user.service = data['service']
+        for item in data['channel']:
+            new_user.channel.add(Channel.objects.get(name=item))
+        for item in data['notification_group']:
+            new_user.notification_group.add(Notification_group.objects.get(group_name=item))
         new_user.set_password(form.cleaned_data['password'])  # ЗАШИФРОВЫВАЕТ пароль
         new_user.send_email = data['receiver']
+        # new_user.channel = data['channel']
+        # new_user.notification_group = data['notification_group']
         new_user.save()
-        messages.success(request, 'Пользователь добавлен в систему.')
-        return render(request, 'accounts/registered.html',  # 'accounts/login.html',
-                      {'new_user': new_user})
+        return render(request, 'accounts/registered.html',{'new_user': new_user})  # 'accounts/login.html'
     return render(request, 'accounts/registration.html', {'form': form})
 
 
 """ Функция для получения реквизитов пользователя """
-
 
 
 @login_required
@@ -68,22 +74,34 @@ def requisites_view(request):
         user_requisites.tg_channel = data['tg_channel']
         user_requisites.phone_number = data['phone_number']
         user_requisites.save()
+        """ Функция для заполнения формы подписки   """
+        subsc = Subscription.objects.create()
+        user_data = User.objects.filter(email=request.user).values('id', 'email', 'notification_group',
+                                                                'channel')
+        for item in user_data:
+            subsc.employee = (User.objects.get(email=item['email']))
+            subsc.employee_requisites.add(Empl_requisites.objects.get(employee=item['id']))
+            subsc.channel.add(Channel.objects.get(id=item['channel']))
+            subsc.notification_group.add(Notification_group.objects.get(id=item['notification_group']))
+        subsc.save()
+
         return render(request, 'msg_sender/home.html',
                       {'user_requisites': user_requisites})
     return render(request, 'accounts/get_user_requisites.html', {'form': form})
 
 
-@login_required
-def subscription_View(request):
-    subsc = Subscription.objects.create()
-    user_data = User.objects.filter(email=request.user).values('id','email', 'service', 'channel')
-    for item in user_data:
-        subsc.employee = (User.objects.get(email=item['email']))
-        subsc.employee_requisites.add(Empl_requisites.objects.get(employee=item['id']))
-        subsc.channel.add(Channel.objects.get(id=item['channel']))
-        subsc.service_name.add(Service.objects.get(id=item['service']))
-    subsc.save()
+""" Функция для заполнения формы подписки   """
 
+# @login_required
+# def subscription_View(request):
+#     subsc = Subscription.objects.create()
+#     user_data = User.objects.filter(email=request.user).values('id', 'email', 'notification_group', 'channel')
+#     for item in user_data:
+#         subsc.employee = (User.objects.get(email=item['email']))
+#         subsc.employee_requisites.add(Empl_requisites.objects.get(employee=item['id']))
+#         subsc.channel.add(Channel.objects.get(id=item['channel']))
+#         subsc.notification_group.add(Notification_group.objects.get(id=item['notification_group']))
+#     subsc.save()
 
 
 # Функция для обновлений данных указанных ранее

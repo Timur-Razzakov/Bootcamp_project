@@ -3,7 +3,7 @@ from django.contrib.auth import get_user_model, authenticate
 from django.contrib.auth.hashers import check_password
 from django.contrib.auth.models import User
 
-from msg_sender.models import Channel, Service
+from msg_sender.models import Channel, Service,Notification_group
 from .models import Empl_requisites, Subscription
 
 User = get_user_model()
@@ -35,19 +35,19 @@ class UserLoginForm(forms.Form):
 class UserRegistrationForm(forms.ModelForm):
     email = forms.EmailField(label='Введите email',
                              widget=forms.EmailInput(attrs={'class': 'form-control'}))
-    channel = forms.ModelChoiceField(
+    channel = forms.ModelMultipleChoiceField(
         queryset=Channel.objects.all(),
-        to_field_name="channels",
+        to_field_name="name",
         required=True,
-        widget=forms.Select(attrs={'class': 'form-control'}),
+        widget=forms.CheckboxSelectMultiple, # attrs={'class': 'form-control'})
         label='Выберите каналы, на которые хотите получать уведомления'
     )
-    service = forms.ModelChoiceField(
-        queryset=Service.objects.all(),
-        to_field_name="service_names",
+    notification_group = forms.ModelMultipleChoiceField(
+        queryset=Notification_group.objects.all(),
+        to_field_name="group_name",
         required=True,
-        widget=forms.Select(attrs={'class': 'form-control'}),
-        label='Выберите сервис, от которого хотите получать уведомления'
+        widget=forms.CheckboxSelectMultiple, # attrs={'class': 'form-control'})
+        label='Выберите группу нотификации, от которой хотите получать уведомления'
     )
     password = forms.CharField(label='Введите пароль',
                                widget=forms.PasswordInput(attrs={'class': 'form-control'}))
@@ -57,15 +57,9 @@ class UserRegistrationForm(forms.ModelForm):
     receiver = forms.BooleanField(required=False, widget=forms.CheckboxInput,
                                   label='Хотите ли вы получать уведомления?')
 
-    # send_to_email = forms.BooleanField(required=False, widget=forms.CheckboxInput,
-    #                                    label='Получать рассылку на почту?')
-    # send_to_tg_channel = forms.BooleanField(required=False, widget=forms.CheckboxInput,
-    #                                         label='Получать рассылку на канал? (тг)')
-    # send_to_tg_privet_channel = forms.BooleanField(required=False, widget=forms.CheckboxInput,
-    #                                                label='Получать рассылку в личку (тг)?')
     class Meta:
         model = User
-        fields = ('email', 'channel', 'service', 'password', 'password2', "receiver",)
+        fields = ('email', 'channel', 'notification_group', 'password', 'password2', "receiver",)
 
     def clean_password2(self):
         data = self.cleaned_data

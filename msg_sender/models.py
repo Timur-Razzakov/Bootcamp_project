@@ -13,44 +13,38 @@ class Service(models.Model):
 
 
 class Channel(models.Model):
-    channels = models.CharField(verbose_name='channel', max_length=255)
+    name = models.CharField(verbose_name='channel_name', max_length=255)
 
     def __str__(self):
-        return self.channels
-#TODO : переименовать description на group_name
+        return self.name
 
 class Notification_group(models.Model):
     service_name = models.ForeignKey(Service, verbose_name='service', on_delete=models.CASCADE, blank=True)
-    description = models.CharField(verbose_name='description_ntf', max_length=255)
-    # group_name = models.CharField(verbose_name='description_ntf', max_length=255)
+    group_name = models.CharField(verbose_name='group_name', max_length=255)
+    description = models.TextField(verbose_name='description_ntf_group', max_length=255)
+
 
     def __str__(self):
-        return self.description
+        return self.group_name
 
 
 class Notification(models.Model):
     title = models.CharField(verbose_name='title', max_length=100)
     status = models.CharField(verbose_name='Notification Status', max_length=30)
-    ntf_group = models.ForeignKey(Notification_group, verbose_name='service_name', on_delete=models.CASCADE,
+    ntf_group = models.ForeignKey(Notification_group, verbose_name='ntf_group', on_delete=models.CASCADE,
                                   blank=True, null=True)
-    email = models.EmailField(verbose_name='email address', max_length=255,
-                              unique=True, )
-
     url = models.CharField(verbose_name='url', max_length=30)
-    message = models.CharField(verbose_name='Message', max_length=255)
+    message = models.TextField(verbose_name='Message', max_length=255)
     created_at = models.DateTimeField(verbose_name=("created_at"), auto_now_add=True)
-
-    def get_channel_names(self, obj):
-        return "\n".join([p.channels for p in self.channel_name.all()])
 
     def __str__(self):
         return self.title
 
 
 class NTF_type_for_channel(models.Model):
-    templates_for_massage = models.CharField(verbose_name='templates_for_massage', max_length=255)
     ntf_group = models.ManyToManyField(Notification_group)
     channel = models.ForeignKey(Channel, verbose_name='channel', on_delete=models.CASCADE, blank=True)
+    templates_for_massage = models.TextField(verbose_name='templates_for_massage', max_length=255)
 
     def __str__(self):
         return str(self.ntf_group)
