@@ -6,7 +6,8 @@ from django.contrib.auth import authenticate, login, logout, get_user_model
 from django.contrib import messages
 from icecream import ic
 
-from accounts.forms import UserLoginForm, UserRegistrationForm, UserRequisitesForm
+from accounts.forms import UserLoginForm, UserRegistrationForm, UserRequisitesForm, Subscription, \
+    UserUpdateForm
 from msg_sender.models import Channel, Service, Notification_group
 from django.contrib.auth.decorators import login_required
 
@@ -24,7 +25,6 @@ def login_view(request):
         password = data.get('password')
         user = authenticate(request, email=email, password=password)
         login(request, user)
-
         return redirect('user_requisites')
     return render(request, 'accounts/login.html', {'form': form})
 
@@ -55,7 +55,7 @@ def register_view(request):
         # new_user.channel = data['channel']
         # new_user.notification_group = data['notification_group']
         new_user.save()
-        return render(request, 'accounts/registered.html',{'new_user': new_user})  # 'accounts/login.html'
+        return render(request, 'accounts/registered.html', {'new_user': new_user})  # 'accounts/login.html'
     return render(request, 'accounts/registration.html', {'form': form})
 
 
@@ -77,7 +77,7 @@ def requisites_view(request):
         """ Функция для заполнения формы подписки   """
         subsc = Subscription.objects.create()
         user_data = User.objects.filter(email=request.user).values('id', 'email', 'notification_group',
-                                                                'channel')
+                                                                   'channel')
         for item in user_data:
             subsc.employee = (User.objects.get(email=item['email']))
             subsc.employee_requisites.add(Empl_requisites.objects.get(employee=item['id']))
@@ -104,33 +104,68 @@ def requisites_view(request):
 #     subsc.save()
 
 
-# Функция для обновлений данных указанных ранее
-# """
-#
-#
-# def update_view(request):
-#     if request.user.is_authenticated:
-#         user = request.user
-#         if request.method == 'POST':
-#             form = UserUpdateForm(request.POST)
-#             if form.is_valid():
-#                 data = form.cleaned_data
-#                 user.tg_nickname = data['tg_nickname']
-#                 user.tg_channel = data['tg_channel']
-#                 user.send_to_email = data['send_to_email']
-#                 user.send_to_tg_channel = data['send_to_tg_channel']
-#                 user.send_to_private_channel = data['send_to_private_channel']
-#                 user.save()
-#                 messages.success(request, 'Данные сохранены.')
-#                 return redirect('update')
-#         form = UserUpdateForm(
-#             initial={'tg_nickname': user.tg_nickname, 'tg_channel': user.tg_channel,
-#                      'send_to_email': user.send_to_email, 'send_to_tg_channel': user.send_to_tg_channel,
-#                      'send_to_private_channel': user.send_to_private_channel})
-#         return render(request, 'accounts/update.html',
-#                       {'form': form, 'contact_form': contact_form})
-#     else:
-#         return redirect('login')
+FORMS = [
+    ("registration", UserRegistrationForm),
+    ("requisites", UserRequisitesForm)
+]
+
+TEMPLATES = {
+    "registration": "registration.html",
+    "requisites": "get_user_model.html"
+}
+"""
+Функция для обновлений данных указанных ранее 
+"""
+
+def update_view(request):
+    if request.user.is_authenticated:
+        user = request.user
+        if request.method == 'POST':
+            form = UserUpdateForm(request.POST)
+            if form.is_valid():
+                data = form.cleaned_data
+                print(data)
+                user.email = data['email']
+                user.channel.set(data['channel'])
+                user.notification_group.set(data['notification_group'])
+
+                user.save()
+                messages.success(request, 'Данные сохранены.')
+                return redirect('update')
+        form = UserRegistrationForm(
+            initial={'email': user.email})  # выводит уже введённые данные
+        return render(request, 'accounts/update.html',
+                      {'form': form,})
+    else:
+        return redirect('login')
+
+
+"""Функция для обновления реквизитов пользователя"""
+
+
+def requisite_update_view(request):
+    if request.method == 'POST':
+        requisites_form = UserRequisitesForm(request.POST or None)
+        if requisites_form.is_valid():
+            data = requisites_form.cleaned_data
+            print(data)
+
+            # qs = Error.objects.filter(created_at=dt.date.today())
+            # if qs.exists():
+            #     err = qs.first()
+            #     data = err.data.get('user_data', [])
+            #     data.append({'city': city, 'email': email, 'speciality': speciality})
+            #     err.data['user_data'] = data
+            #     err.save()
+            # else:
+            #     data = [{'city': city, 'email': email, 'speciality': speciality}]
+            #     Error(data=f"user_data:{data}").save()
+            # messages.success(request, 'Данные отправлены администрации.')
+            # return redirect('update')
+        else:
+            return redirect('update')
+    else:
+        return redirect('home')
 
 
 """Функция для удаления пользователя"""

@@ -3,7 +3,7 @@ from django.contrib.auth import get_user_model, authenticate
 from django.contrib.auth.hashers import check_password
 from django.contrib.auth.models import User
 
-from msg_sender.models import Channel, Service,Notification_group
+from msg_sender.models import Channel, Service, Notification_group
 from .models import Empl_requisites, Subscription
 
 User = get_user_model()
@@ -39,14 +39,14 @@ class UserRegistrationForm(forms.ModelForm):
         queryset=Channel.objects.all(),
         to_field_name="name",
         required=True,
-        widget=forms.CheckboxSelectMultiple, # attrs={'class': 'form-control'})
+        widget=forms.SelectMultiple(attrs={'class': 'form-control'}),  #
         label='Выберите каналы, на которые хотите получать уведомления'
     )
     notification_group = forms.ModelMultipleChoiceField(
         queryset=Notification_group.objects.all(),
         to_field_name="group_name",
         required=True,
-        widget=forms.CheckboxSelectMultiple, # attrs={'class': 'form-control'})
+        widget=forms.SelectMultiple(attrs={'class': 'form-control'}),  #
         label='Выберите группу нотификации, от которой хотите получать уведомления'
     )
     password = forms.CharField(label='Введите пароль',
@@ -72,13 +72,6 @@ class UserRegistrationForm(forms.ModelForm):
 
 
 class UserRequisitesForm(forms.ModelForm):
-
-    # employee = forms.ModelChoiceField(
-    #     queryset=User.objects.filter(is_active=True),
-    #     required=True,
-    #     widget=forms.Select(attrs={'class': 'form-control'}),
-    #     label='employee_email'
-    # )
     tg_nickname = forms.CharField(label='Введите Имя телеграмм аккаунта, для получения уведомлений',
                                   widget=forms.TextInput(attrs={'class': 'form-control'}))
     tg_channel = forms.CharField(label='Введите Канал, на который хотите получать уведомление (тг)',
@@ -86,7 +79,6 @@ class UserRequisitesForm(forms.ModelForm):
     phone_number = forms.CharField(
         label='Введите номер телефона, на который хотите получать уведомление (тг)',
         widget=forms.TextInput(attrs={'class': 'form-control'}))
-
 
     class Meta:
         model = Empl_requisites
@@ -107,3 +99,53 @@ class UserRequisitesForm(forms.ModelForm):
 #     class Meta:
 #         model = Subscription
 #         fields = ('employee', 'service_name', 'channel', 'employee_requisites',)
+
+
+"""
+Форма для обновления указанных данных пользователем
+"""
+
+
+class UserUpdateForm(forms.Form, UserRequisitesForm, UserRegistrationForm):
+    old_password = forms.CharField(label='Введите пароль',
+                                   widget=forms.PasswordInput(attrs={'class': 'form-control'}))
+
+#
+# class UserUpdateForm(forms.Form):
+#     email = forms.EmailField(label='Введите email',
+#                              widget=forms.EmailInput(attrs={'class': 'form-control'}))
+#     channel = forms.ModelMultipleChoiceField(
+#         queryset=Channel.objects.all(),
+#         to_field_name="name",
+#         required=True,
+#         widget=forms.SelectMultiple(attrs={'class': 'form-control'}),
+#         label='Выберите каналы, на которые хотите получать уведомления'
+#     )
+#     notification_group = forms.ModelMultipleChoiceField(
+#         queryset=Notification_group.objects.all(),
+#         to_field_name="group_name",
+#         required=True,
+#         widget=forms.SelectMultiple(attrs={'class': 'form-control'}),
+#         label='Выберите группу нотификации, от которой хотите получать уведомления'
+#     )
+#     old_password = forms.CharField(label='Введите пароль',
+#                                    widget=forms.PasswordInput(attrs={'class': 'form-control'}))
+
+#     class Meta:
+#         model = User
+#         fields = ('email', 'channel', 'notification_group', 'old_password', 'password', 'password2')
+
+
+# class RequisitesForm(forms.Form):
+#     tg_nickname = forms.CharField(
+#         required=True, widget=forms.TextInput(attrs={'class': 'form-control'}),
+#         label='Город'
+#     )
+#     tg_channel = forms.CharField(
+#         required=True, widget=forms.TextInput(attrs={'class': 'form-control'}),
+#         label='Специальность'
+#     )
+#     tg_channel = forms.EmailField(
+#         label='Введите email', required=True, widget=forms.EmailInput(
+#             attrs={'class': 'form-control'})
+#     )

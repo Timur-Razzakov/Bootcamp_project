@@ -18,4 +18,31 @@
         </form>
     </div>
 </div>
+
+
+<div class="row my-5">
+    <div class="col-md-8 mx-auto">
+        <p class="my-2">Если выши реквизиты были изменены или вы используете другие, то укажите их пожалуйста!!</p>
+        <p>
+            <button class="btn btn-success"
+                    type="button" data-toggle="collapse"
+                    data-target="#collapsed" aria-expanded="false"
+                    aria-controls="collapseExample">
+                Показать форму
+            </button>
+        </p>
+        <div class="collapse" id="collapsed">
+            <div class="card card-body">
+                <form method="POST" action="{% url 'requisites_update' %} ">{% csrf_token %}
+                    <div class="form-group">
+                        {{ requisites_form.as_p }}
+                    </div>
+                    <button type="submit" class="btn btn-primary">Отправить</button>
+                </form>
+            </div>
+        </div>
+
+
+    </div>
+</div>
 {% endblock %}

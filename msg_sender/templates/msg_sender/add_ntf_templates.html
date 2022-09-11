@@ -1,23 +1,22 @@
 {% extends "base.html" %}
-
-
-{% block title %} Register {% endblock %}
-
+{% block title %} NTF_templates {% endblock %}
 
 {% block content %}
+
 <div class="col-md-8 mx-auto my-2">
     <div class="container px-4">
         <div class="row ">
             <div class="col-md-8 mx-auto">
-                <h4 class="my-2">Регистрация нового пользователя</h4>
+                <h4 class="my-2 text-center">Форма для создания шаблонов для нотификаций</h4>
                 <form method="POST" action="">{% csrf_token %}
                     <div class="form-group">
                         {{ form.as_p }}
                     </div>
-                    <button type="submit" class="btn btn-primary">Зарегистрироваться</button>
+                    <button type="submit" class="btn btn-primary">Сохранить</button>
                 </form>
             </div>
         </div>
     </div>
 </div>
+
 {% endblock %}

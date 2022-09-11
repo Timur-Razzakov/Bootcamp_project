@@ -6,7 +6,7 @@ from django.core import validators
 class Service(models.Model):
     service_names = models.CharField(verbose_name='service_name', max_length=255)
     image = models.ImageField(verbose_name=' images', upload_to='media/%Y/%m/%d', blank=True)
-    description = models.TextField(verbose_name='description', max_length=255,null=True,blank=True)
+    description = models.TextField(verbose_name='description', max_length=255, null=True, blank=True)
 
     def __str__(self):
         return self.service_names
@@ -18,11 +18,11 @@ class Channel(models.Model):
     def __str__(self):
         return self.name
 
+
 class Notification_group(models.Model):
     service_name = models.ForeignKey(Service, verbose_name='service', on_delete=models.CASCADE, blank=True)
     group_name = models.CharField(verbose_name='group_name', max_length=255)
     description = models.TextField(verbose_name='description_ntf_group', max_length=255)
-
 
     def __str__(self):
         return self.group_name
@@ -42,9 +42,9 @@ class Notification(models.Model):
 
 
 class NTF_type_for_channel(models.Model):
-    ntf_group = models.ManyToManyField(Notification_group)
-    channel = models.ForeignKey(Channel, verbose_name='channel', on_delete=models.CASCADE, blank=True)
-    templates_for_massage = models.TextField(verbose_name='templates_for_massage', max_length=255)
+    ntf_group = models.ManyToManyField(Notification_group, blank=True)
+    channel = models.ManyToManyField(Channel, verbose_name='channel', blank=True)
+    templates_for_massage = models.TextField(verbose_name='templates_for_massage')
 
     def __str__(self):
-        return str(self.ntf_group)
+        return str(self.channel)
