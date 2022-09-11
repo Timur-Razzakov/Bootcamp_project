@@ -53,7 +53,7 @@ def receive(request):
 
 
 @csrf_exempt
-def receive(request):
+def send_to_microservice(request):
     results = []
     if request.method == "POST":
         data = json.loads(request.body.decode())

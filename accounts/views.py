@@ -16,16 +16,20 @@ from .models import Empl_requisites, Subscription
 
 """Функция для авторизации"""
 
-
 def login_view(request):
     form = UserLoginForm(request.POST or None)
+
     if form.is_valid():
         data = form.cleaned_data
         email = data.get('email')
         password = data.get('password')
         user = authenticate(request, email=email, password=password)
         login(request, user)
-        return redirect('user_requisites')
+        employee_requisites = Empl_requisites.objects.filter(employee=request.user)
+        if employee_requisites.exists():
+            return redirect('home')
+        else:
+            return redirect('user_requisites')
     return render(request, 'accounts/login.html', {'form': form})
 
 
