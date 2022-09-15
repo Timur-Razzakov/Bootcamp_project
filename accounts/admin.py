@@ -52,13 +52,13 @@ class UserAdmin(BaseUserAdmin):
     form = UserChangeForm
     add_form = UserCreationForm
 
-    list_display = ('email', 'id', 'is_admin', 'receiver', 'get_channels', 'get_notification_group')
+    list_display = ('email', 'id', 'is_admin', 'receiver', 'get_notification_group')
     list_filter = ('is_admin',)
     fieldsets = (
         # Поля для Отображения в админке
         (None, {'fields': ('email', 'password')}),
         ('Send massage to...',
-         {'fields': ('receiver', 'channel', 'notification_group')}),
+         {'fields': ('receiver', 'notification_group')}),
         ('Permissions', {'fields': ('is_admin',)}),
     )
     """ Поля ManyToManyField не поддерживаются, поэтому создал эту функцию, по другому не знаю как поступить"""
@@ -67,9 +67,6 @@ class UserAdmin(BaseUserAdmin):
     https://discuss.dizzycoding.com/many-to-many-in-list-display-django/
     """
 
-    def get_channels(self, obj): #obj.channel.all -> должен быть одинаковым с именем в модельке
-        return "\n".join([ch.name for ch in obj.channel.all()])
-
     def get_notification_group(self, obj):
         return "\n".join([ntf.group_name for ntf in obj.notification_group.all()])
 
@@ -77,7 +74,7 @@ class UserAdmin(BaseUserAdmin):
     add_fieldsets = (
         (None, {
             'classes': ('wide',),
-            'fields': ('email', 'password1', 'password2', 'channel', 'notification_group', 'receiver'),
+            'fields': ('email', 'password1', 'password2', 'notification_group', 'receiver'),
         }),
     )
     search_fields = ('email',)

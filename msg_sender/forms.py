@@ -41,3 +41,4 @@ class NTF_typeForm(forms.ModelForm):
     class Meta:
         model = NTF_type_for_channel
         fields = ('ntf_group', 'channel', 'templates_for_massage')
+

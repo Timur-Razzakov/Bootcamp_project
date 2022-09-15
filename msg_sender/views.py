@@ -1,18 +1,20 @@
 import datetime
 import json
-
+import pika
 from django.contrib import messages
 from django.contrib.auth import get_user_model
+import requests
 from django.shortcuts import render, redirect
 from django.views.decorators.csrf import csrf_exempt
 from icecream import ic
+from psycopg2.extensions import JSON
 
 from accounts.models import Subscription, Empl_requisites
 from natification_service.settings import (
     EMAIL_HOST_USER
 )
 from .forms import NTF_typeForm
-from .models import Service, Channel, Notification_group, Notification
+from .models import Service, Channel, Notification_group, Notification, Result, NTF_type_for_channel
 
 
 def home_view(request):
@@ -49,55 +51,6 @@ def receive(request):
         return redirect('/')
 
 
-"""Функция для сбора всех данных и отправка в сервисы для рассылки нотификаций"""
-
-
-@csrf_exempt
-def send_to_microservice(request):
-    results = []
-    if request.method == "POST":
-        data = json.loads(request.body.decode())
-        qs = Subscription.objects.filter(notification_group=data['notification_group']).values(
-            'employee', 'channel', 'employee_requisites', 'notification_group')
-        for item in qs:
-            channel_names = Channel.objects.get(id=item['channel'])
-            if channel_names == Channel.objects.get(name='email'):
-                employee = User.objects.filter(notification_group=item['notification_group']).values(
-                    'email')
-                for email in employee:
-                    employee_email = {
-                        'channel': channel_names.name,
-                        'title': data['title'],
-                        'status': data['status'],
-                        'created_at': data['created_at'],
-                        'message': data['message'],
-                        'url': data['url'],
-                        'email': email['email']
-                    }
-                    results.append(employee_email)
-            else:
-                employee_requisites = Empl_requisites.objects.filter(employee=item['employee']).values(
-                    'tg_nickname', 'tg_channel', 'phone_number')
-                for employee_requisite in employee_requisites:
-                    employee_requisites = {
-                        'channel': channel_names.name,
-                        'title': data['title'],
-                        'status': data['status'],
-                        'created_at': data['created_at'],
-                        'message': data['message'],
-                        'url': data['url'],
-                        'tg_nickname': employee_requisite['tg_nickname'],
-                        'tg_channel': employee_requisite['tg_channel'],
-                        'phone_number': employee_requisite['phone_number']
-                    }
-                    results.append(employee_requisites)
-
-        ic(results)
-
-        messages.success(request, 'Данные сохранены.')
-        return redirect('/')
-
-
 """Функция для заполнения шаблонов пользователями """
 
 
@@ -116,3 +69,43 @@ def ntf_templates_view(request):
         return render(request, 'msg_sender/my_templates.html',
                       {'new_ntf_templates': new_ntf_templates})  # 'accounts/login.html'
     return render(request, 'msg_sender/add_ntf_templates.html', {'form': form})
+
+
+"""Функция для сбора всех данных и отправка в сервисы для рассылки нотификаций"""
+"""
+class Result(models.Model):
+    massage = models.TextField(verbose_name="текст сообщения")=
+    sending_status = models.CharField(verbose_name='sending_status', max_length=30, blank=True)
+    process_date = models.DateField(verbose_name='send_to', blank=True)
+
+"""
+
+
+@csrf_exempt
+def save_to_result(request):
+    if request.method == "POST":
+        data = json.loads(request.body.decode())
+        ic(data)
+        qs = Subscription.objects.filter(notification_group=data['notification_group']).values(
+            'employee_requisites', 'notification_group')
+        ic(qs)
+        res_for_send = Result.objects.create()
+        for item in qs:
+            employee_requisite = Empl_requisites.objects.filter(id=item['employee_requisites']).values(
+                'channel', 'user_details')
+            for item in employee_requisite:
+                channel_names = Channel.objects.get(id=item['channel'])
+                ntf_templates = NTF_type_for_channel.objects.filter(id=item['channel']).values('templates_for_massage')
+                for template in ntf_templates:
+                    ic(template['templates_for_massage'])
+                    res_for_send.message = template['templates_for_massage']
+                res_for_send.channels = Channel.objects.get(id=item['channel'])
+                employee_details = json.dumps({f'{channel_names}': item['user_details']})
+                res_for_send.employee_details = employee_details
+            res_for_send.status = data['status']
+            res_for_send.url = data['url']
+            res_for_send.created_at = data['created_at']
+            res_for_send.message_title = data['title']
+            res_for_send.save()
+            messages.success(request, 'Данные сохранены')
+        return redirect('/')

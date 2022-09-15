@@ -1,6 +1,3 @@
-import datetime as dt
-
-from django.http import HttpResponseRedirect
 from django.shortcuts import render, redirect
 from django.contrib.auth import authenticate, login, logout, get_user_model
 from django.contrib import messages
@@ -8,13 +5,14 @@ from icecream import ic
 
 from accounts.forms import UserLoginForm, UserRegistrationForm, UserRequisitesForm, Subscription, \
     UserUpdateForm
-from msg_sender.models import Channel, Service, Notification_group
+from msg_sender.models import Channel, Notification_group
 from django.contrib.auth.decorators import login_required
 
 User = get_user_model()
 from .models import Empl_requisites, Subscription
 
 """Функция для авторизации"""
+
 
 def login_view(request):
     form = UserLoginForm(request.POST or None)
@@ -50,14 +48,10 @@ def register_view(request):
     if form.is_valid():
         new_user = form.save()  # instans) commit=False-->исп для полного соединения с базой
         data = form.cleaned_data
-        for item in data['channel']:
-            new_user.channel.add(Channel.objects.get(name=item))
         for item in data['notification_group']:
             new_user.notification_group.add(Notification_group.objects.get(group_name=item))
         new_user.set_password(form.cleaned_data['password'])  # ЗАШИФРОВЫВАЕТ пароль
         new_user.send_email = data['receiver']
-        # new_user.channel = data['channel']
-        # new_user.notification_group = data['notification_group']
         new_user.save()
         return render(request, 'accounts/registered.html', {'new_user': new_user})  # 'accounts/login.html'
     return render(request, 'accounts/registration.html', {'form': form})
@@ -69,28 +63,30 @@ def register_view(request):
 @login_required
 def requisites_view(request):
     form = UserRequisitesForm(request.POST or None)
+    user = request.user
     if form.is_valid():
-        email = User.objects.get(email=request.user)
+
         user_requisites = form.save(commit=False)
         data = form.cleaned_data
+        email = User.objects.get(email=data['employee'])
+        channel = Channel.objects.get(name=data['channel'])
         user_requisites.employee = email
-        user_requisites.tg_nickname = data['tg_nickname']
-        user_requisites.tg_channel = data['tg_channel']
-        user_requisites.phone_number = data['phone_number']
+        user_requisites.channel = channel
+
+        user_requisites.user_details = data['user_details']
         user_requisites.save()
+
         """ Функция для заполнения формы подписки   """
         subsc = Subscription.objects.create()
-        user_data = User.objects.filter(email=request.user).values('id', 'email', 'notification_group',
-                                                                   'channel')
+        user_data = User.objects.filter(email=request.user).values('id', 'email', 'notification_group')
         for item in user_data:
-            subsc.employee = (User.objects.get(email=item['email']))
             subsc.employee_requisites.add(Empl_requisites.objects.get(employee=item['id']))
-            subsc.channel.add(Channel.objects.get(id=item['channel']))
             subsc.notification_group.add(Notification_group.objects.get(id=item['notification_group']))
         subsc.save()
-
+        form = UserRegistrationForm(
+            initial={'email': user.email, 'notification_group': user.notification_group})  # выводит уже введённые данные
         return render(request, 'msg_sender/home.html',
-                      {'user_requisites': user_requisites})
+                      {'form': form})
     return render(request, 'accounts/get_user_requisites.html', {'form': form})
 
 
@@ -108,18 +104,10 @@ def requisites_view(request):
 #     subsc.save()
 
 
-FORMS = [
-    ("registration", UserRegistrationForm),
-    ("requisites", UserRequisitesForm)
-]
-
-TEMPLATES = {
-    "registration": "registration.html",
-    "requisites": "get_user_model.html"
-}
 """
 Функция для обновлений данных указанных ранее 
 """
+
 
 def update_view(request):
     if request.user.is_authenticated:
@@ -130,16 +118,14 @@ def update_view(request):
                 data = form.cleaned_data
                 print(data)
                 user.email = data['email']
-                user.channel.set(data['channel'])
                 user.notification_group.set(data['notification_group'])
-
                 user.save()
                 messages.success(request, 'Данные сохранены.')
                 return redirect('update')
         form = UserRegistrationForm(
             initial={'email': user.email})  # выводит уже введённые данные
         return render(request, 'accounts/update.html',
-                      {'form': form,})
+                      {'form': form, })
     else:
         return redirect('login')
 

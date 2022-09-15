@@ -35,13 +35,7 @@ class UserLoginForm(forms.Form):
 class UserRegistrationForm(forms.ModelForm):
     email = forms.EmailField(label='Введите email',
                              widget=forms.EmailInput(attrs={'class': 'form-control'}))
-    channel = forms.ModelMultipleChoiceField(
-        queryset=Channel.objects.all(),
-        to_field_name="name",
-        required=True,
-        widget=forms.SelectMultiple(attrs={'class': 'form-control'}),  #
-        label='Выберите каналы, на которые хотите получать уведомления'
-    )
+
     notification_group = forms.ModelMultipleChoiceField(
         queryset=Notification_group.objects.all(),
         to_field_name="group_name",
@@ -59,7 +53,7 @@ class UserRegistrationForm(forms.ModelForm):
 
     class Meta:
         model = User
-        fields = ('email', 'channel', 'notification_group', 'password', 'password2', "receiver",)
+        fields = ('email', 'notification_group', 'password', 'password2', "receiver",)
 
     def clean_password2(self):
         data = self.cleaned_data
@@ -72,17 +66,24 @@ class UserRegistrationForm(forms.ModelForm):
 
 
 class UserRequisitesForm(forms.ModelForm):
-    tg_nickname = forms.CharField(label='Введите Имя телеграмм аккаунта, для получения уведомлений',
-                                  widget=forms.TextInput(attrs={'class': 'form-control'}))
-    tg_channel = forms.CharField(label='Введите Канал, на который хотите получать уведомление (тг)',
-                                 widget=forms.TextInput(attrs={'class': 'form-control'}))
-    phone_number = forms.CharField(
-        label='Введите номер телефона, на который хотите получать уведомление (тг)',
-        widget=forms.TextInput(attrs={'class': 'form-control'}))
+    employee = forms.ModelChoiceField(
+        queryset=User.objects.all(),
+        required=True,
+        widget=forms.Select(attrs={'class': 'form-control'})
+    )
+    channel = forms.ModelChoiceField(
+            queryset=Channel.objects.all(),
+            to_field_name="name",
+            required=True,
+            widget=forms.Select(attrs={'class': 'form-control'}),
+            label='Выберите канал, для которого хотите ввести реквизиты'
+        )
+    user_details = forms.CharField(label='Введите свои реквизиты, через пробел',
+                                   widget=forms.TextInput(attrs={'class': 'form-control'}))
 
     class Meta:
         model = Empl_requisites
-        fields = ('tg_nickname', 'tg_channel', 'phone_number')  # 'employee',
+        fields = ('employee', 'channel', 'user_details')  # 'employee',
 
 
 """Форма для заполнения подписки на сервисы"""

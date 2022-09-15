@@ -2,7 +2,7 @@ from ckeditor_uploader.widgets import CKEditorUploadingWidget
 from django.contrib import admin
 from django import forms
 from django.template.defaultfilters import truncatechars
-from .models import Service, Notification_group, Channel, Notification, NTF_type_for_channel
+from .models import Service, Notification_group, Channel, Notification, NTF_type_for_channel, Result
 from ckeditor_uploader.widgets import CKEditorUploadingWidget
 
 
@@ -64,3 +64,4 @@ admin.site.register(Notification_group, Notification_groupAdmin)
 admin.site.register(Channel)
 admin.site.register(Notification, NotificationAdmin)
 admin.site.register(NTF_type_for_channel, )
+admin.site.register(Result,)

@@ -1,7 +1,7 @@
 from django.contrib.auth.base_user import AbstractBaseUser, BaseUserManager
 from django.db import models
 
-from msg_sender.models import  Channel, NTF_type_for_channel,Notification_group
+from msg_sender.models import Channel, NTF_type_for_channel, Notification_group
 
 
 # class Employee(models.Model):
@@ -15,22 +15,33 @@ from msg_sender.models import  Channel, NTF_type_for_channel,Notification_group
 #         return self.email
 
 
+# class Empl_requisites(models.Model):
+#     employee = models.ForeignKey('MyUser', verbose_name='employee', on_delete=models.CASCADE, unique=True,
+#                                  blank=True)
+#     tg_nickname = models.CharField(max_length=50, verbose_name='tg_nickname', null=True)
+#     tg_channel = models.CharField(max_length=50, verbose_name='tg_channel', null=True)
+#     phone_number = models.CharField(max_length=50, verbose_name='phone_number', null=True)
+#
+#     def __str__(self):
+#         return self.phone_number
+
+
 class Empl_requisites(models.Model):
-    employee = models.ForeignKey('MyUser', verbose_name='employee', on_delete=models.CASCADE,unique=True, blank=True)
-    tg_nickname = models.CharField(max_length=50, verbose_name='tg_nickname', null=True)
-    tg_channel = models.CharField(max_length=50, verbose_name='tg_channel', null=True)
-    phone_number = models.CharField(max_length=50, verbose_name='phone_number', null=True)
+    # channel = models.ManyToManyField(Channel)
+    employee = models.ForeignKey('MyUser', verbose_name='employee', on_delete=models.CASCADE,
+                                 blank=True, null=True)
+    channel = models.ForeignKey(Channel, verbose_name='channel', on_delete=models.SET_NULL, blank=True,
+                                null=True)
+    user_details = models.CharField(max_length=255, verbose_name='user_requisites')
 
     def __str__(self):
-        return self.phone_number
+        return str(self.employee)
 
 
 class Subscription(models.Model):
-    employee = models.ForeignKey('MyUser', verbose_name='employee', on_delete=models.SET_NULL, null=True,
-                                 blank=True)
     notification_group = models.ManyToManyField(Notification_group)
-    channel = models.ManyToManyField(Channel)
     employee_requisites = models.ManyToManyField(Empl_requisites)
+
     # service_name = models.ForeignKey(Service, verbose_name='service_name', on_delete=models.CASCADE,
     #                                  null=True,
     #                                  blank=True)
@@ -38,7 +49,7 @@ class Subscription(models.Model):
     #                                         on_delete=models.CASCADE, null=True,
     #                                         blank=True)
     def __str__(self):
-        return str(self.employee)
+        return str(self.employee_requisites)
 
 
 class MyUserManager(BaseUserManager):
@@ -82,7 +93,6 @@ class MyUser(AbstractBaseUser):
 
     notification_group = models.ManyToManyField(Notification_group, verbose_name='notification_group')
 
-    channel = models.ManyToManyField(Channel, verbose_name='channel_name')
     # channel = models.ForeignKey(Channel, verbose_name='channel_name', on_delete=models.SET_NULL, null=True,
     #                             blank=True)
     # notification_group = models.ForeignKey(Notification_group, verbose_name='notification_group', on_delete=models.SET_NULL, null=True,

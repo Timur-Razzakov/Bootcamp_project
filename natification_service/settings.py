@@ -14,10 +14,10 @@ from pathlib import Path
 import dotenv
 import os
 
-dotenv.load_dotenv('.env')
+
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
-
+dotenv.load_dotenv(f'{BASE_DIR}/.env')
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/4.1/howto/deployment/checklist/
 
@@ -98,6 +98,7 @@ DATABASES = {
         'PORT': os.environ.get('POSTGRES_PORT')
     }
 }
+
 AUTH_USER_MODEL = 'accounts.MyUser'
 
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
