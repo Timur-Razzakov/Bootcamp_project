@@ -1,4 +1,5 @@
 import datetime
+
 import os, sys
 
 from django.contrib.auth import get_user_model
@@ -11,63 +12,51 @@ import django
 django.setup()
 
 # -------------------------------------------------------------------------------
-
+import json
 import time
-from django.core.mail import EmailMultiAlternatives
-from msg_sender.models import Notification, Service
+from django.core.mail import EmailMultiAlternatives, EmailMessage
+from msg_sender.models import Notification, Service, Result, Channel
 from accounts.models import Empl_requisites, MyUser
 from natification_service.settings import (
     EMAIL_HOST_USER
 )
 
-today = datetime.date.today()
-subject = f"Нотификация {today}"
-text_content = f"Пробная нотификация {today}"
-empty = '<h2> упс... </h2>'
+from msg_sender.views import ADMIN_USER
+from django.template.loader import render_to_string
 
-# ADMIN_USER = EMAIL_HOST_USER
-#
-# # Возвращает пользователя по умолчанию
-User = get_user_model()
+results = Result.objects.filter(channels=Channel.objects.get(name='email')).exclude(sending_status='Ok')
+print(results)
 
-qs = Notification.objects.filter(url='some url')
-print(qs)
-# #
-# qs = Employee.objects.filter(receiver=True).values('channel', 'service', 'email')
-# print(User.objects.all())
-# user_dct = {}
-# for item in qs:
-#     user_dct.setdefault((item['city'], item['speciality']), [])  # 3параметр, это тип (список)
-#     user_dct[(item['city'], item['speciality'])].append(item['email'])
-#
-# if user_dct:
-#     # поиск всех значений, которые принадлежат данной паре
-#     params = {'city_id__in': [], 'speciality_id__in': []}
-#
-#     for pair in user_dct.keys():
-#         params['city_id__in'].append(pair[0])
-#         params['speciality_id__in'].append(pair[1])
-#     qs = Vacancies.objects.filter(**params).values()[:10]
-#     vacancy = {}
-#     for item in qs:
-#         """Получем значения из нашего 'queryset' """
-#         vacancy.setdefault((item['city_id'], item['speciality_id']), [])
-#         vacancy[(item['city_id'], item['speciality_id'])].append(item)
-#     for keys, emails in user_dct.items():
-#         rows = vacancy.get(keys, [])
-#         html = ''
-#         for row in rows:
-#             """Формат для  отправки сообщения"""
-#             html += f'<h5><a href="{row["url"]}">{row["title"]}</a></h5>'
-#             html += f'<p><strong>{row["salary"]}</strong></p>'
-#             html += f'<p><strong>{row["company_name"]}</strong></p>'
-#         _html = html if html else empty
-#         for email in emails:
-#             """Перебираем все наши имайли и отправляем сообщения"""
-#             to = email
-#             msg = EmailMultiAlternatives(
-#                 subject, text_content, ADMIN_USER, [to]
-#             )
-#             msg.attach_alternative(_html, "text/html")
-#             msg.send()
-#
+
+def handle(data, result):
+    subject = data['message_title']
+    content = data['message'] + '\n' + 'This notification received on: ' + data[
+        'created_at'] + '\n' + 'For more information, follow the link: ' + data['url']
+    print(content)
+    # html_content = render_to_string('mail/email.html', data)
+    from_email = ADMIN_USER
+    to_send = []
+    emails = data['employee_details']
+    for key in emails:
+        to_send.append(emails[key])
+
+    msg = EmailMessage(subject, content, from_email, to_send)
+    # msg.content_subtype = "html"
+    # msg.attach_alternative(html_content, "text/html")
+    res = msg.send()
+    result.sending_status = 'Ok'
+    result.save()
+
+    print("Sended")
+
+
+for result in results:
+    data = {'message_title': result.message_title,
+            'message': result.message,
+            'status': result.status,
+            'created_at': str(result.created_at),
+            'url': result.url,
+            'employee_details': json.loads(result.employee_details.encode())
+            }
+
+    handle(data, result)

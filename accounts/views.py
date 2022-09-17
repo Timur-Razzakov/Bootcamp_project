@@ -1,15 +1,17 @@
+import json
+
 from django.shortcuts import render, redirect
 from django.contrib.auth import authenticate, login, logout, get_user_model
 from django.contrib import messages
 from icecream import ic
-
+from django.views.decorators.csrf import csrf_exempt
 from accounts.forms import UserLoginForm, UserRegistrationForm, UserRequisitesForm, Subscription, \
     UserUpdateForm
 from msg_sender.models import Channel, Notification_group
 from django.contrib.auth.decorators import login_required
 
 User = get_user_model()
-from .models import Empl_requisites, Subscription
+from .models import Empl_requisites, Subscription, Result
 
 """Функция для авторизации"""
 
@@ -169,3 +171,39 @@ def delete_view(request):
             qs.delete()
             messages.error(request, 'Пользователь удалён :(')
     return redirect('home')
+
+
+
+"""Функция для сбора всех данных и отправка в сервисы для рассылки нотификаций
+"""
+
+# TODO:пересмотреть сохранение, сохраняет только одного пользователя #Done!!
+
+@csrf_exempt
+def save_to_result(request):
+    if request.method == "POST":
+        data = json.loads(request.body.decode())
+        qs = Subscription.objects.filter(notification_group=data['notification_group']).values(
+            'employee_requisites', 'notification_group')
+        res_for_send = Result.objects.create()
+        for item in qs:
+            employee_requisite = Empl_requisites.objects.filter(id=item['employee_requisites']).values(
+                'channel', 'user_details')
+            for item in employee_requisite:
+                channel_names = Channel.objects.get(id=item['channel'])
+                employee_detail = Empl_requisites.objects.get(user_details=item['user_details'])
+                # ntf_templates = NTF_type_for_channel.objects.filter(id=item['channel']).values('templates_for_massage')
+                # for template in ntf_templates:
+                #     ic(template['templates_for_massage'])
+                #     res_for_send.message = template['templates_for_massage']
+                res_for_send.channels.add(channel_names)
+                res_for_send.status = data['status']
+                res_for_send.url = data['url']
+                res_for_send.created_at = data['created_at']
+                res_for_send.message_title = data['title']
+                res_for_send.message = data['message']
+                res_for_send.employee_details.add(employee_detail)
+            res_for_send.save()
+
+        messages.success(request, 'Данные сохранены')
+        return redirect('/')

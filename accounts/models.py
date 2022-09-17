@@ -35,7 +35,7 @@ class Empl_requisites(models.Model):
     user_details = models.CharField(max_length=255, verbose_name='user_requisites')
 
     def __str__(self):
-        return str(self.employee)
+        return str(self.user_details)
 
 
 class Subscription(models.Model):
@@ -50,6 +50,25 @@ class Subscription(models.Model):
     #                                         blank=True)
     def __str__(self):
         return str(self.employee_requisites)
+
+
+"""Модель для итоговых данных"""
+
+
+class Result(models.Model):
+    channels = models.ManyToManyField(Channel, verbose_name='channels for send')
+    message = models.TextField(verbose_name="Message")
+    employee_details = models.ManyToManyField(Empl_requisites,verbose_name="employee_requisites")
+    # employee_details = models.JSONField(verbose_name="employee_requisites", null=True, blank=True)
+    status = models.CharField(verbose_name='Notification status', max_length=90)
+    sending_status = models.CharField(verbose_name='sending_status', max_length=90, null=True, blank=True)
+    message_title = models.CharField(verbose_name='massage_title', max_length=255, null=True, blank=True)
+    url = models.CharField(verbose_name='url', max_length=255, null=True, blank=True)
+    process_date = models.DateField(verbose_name='send_to', null=True, blank=True)
+    created_at = models.DateField(verbose_name=("created_at"), null=True, blank=True)
+
+    def __str__(self):
+        return str(self.status)
 
 
 class MyUserManager(BaseUserManager):

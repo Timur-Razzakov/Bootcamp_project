@@ -4,7 +4,7 @@ from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
 from django.contrib.auth.forms import ReadOnlyPasswordHashField
 from django.contrib.auth.models import Group
 
-from .models import MyUser, Empl_requisites, Subscription
+from .models import MyUser, Empl_requisites, Subscription,Result
 
 
 class UserCreationForm(forms.ModelForm):
@@ -85,5 +85,6 @@ class UserAdmin(BaseUserAdmin):
 admin.site.register(MyUser, UserAdmin)
 admin.site.register(Empl_requisites)
 admin.site.register(Subscription)
+admin.site.register(Result)
 """ отмена регистрацию модели группы от администратора"""
 admin.site.unregister(Group)
