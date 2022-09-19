@@ -36,9 +36,9 @@ class Notification(models.Model):
     ntf_group = models.ForeignKey(Notification_group, verbose_name='ntf_group', on_delete=models.CASCADE,
                                   blank=True, null=True)
     url = models.CharField(verbose_name='url', max_length=30)
-    message = models.TextField(verbose_name='Message', max_length=255)
+    message = models.TextField(verbose_name='Message')
     created_at = models.DateField(verbose_name=("created_at"), auto_now_add=True)
-    recipient = models.CharField(verbose_name="employee_recipient",max_length=255, null=True, blank=True)
+    recipient = models.TextField(verbose_name="employee_recipient", null=True, blank=True)
 
     def __str__(self):
         return self.title

@@ -42,7 +42,8 @@ def receive(request):
         ntf.message = data["message"]
         ntf.created_at = data["created_at"]
         ntf.ntf_group = ntf_group
-        ntf.recipient = data["email"]
+        # for item in data["recipient"]:
+        ntf.recipient = data["recipient"]
         ntf.save()
         ic('Данные сохранены.')
         messages.success(request, 'Данные сохранены.')
@@ -67,4 +68,3 @@ def ntf_templates_view(request):
         return render(request, 'msg_sender/my_templates.html',
                       {'new_ntf_templates': new_ntf_templates})  # 'accounts/login.html'
     return render(request, 'msg_sender/add_ntf_templates.html', {'form': form})
-

@@ -66,27 +66,38 @@ def register_view(request):
 def requisites_view(request):
     form = UserRequisitesForm(request.POST or None)
     user = request.user
+    emp_email =[]
+    emp_channel=[]
     if form.is_valid():
-
-        user_requisites = form.save(commit=False)
         data = form.cleaned_data
+        user_requisites = form.save(commit=False)
+        user_details = data['user_details'].split(',')
         email = User.objects.get(email=data['employee'])
+        emp_email.append(email)
         channel = Channel.objects.get(name=data['channel'])
-        user_requisites.employee = email
-        user_requisites.channel = channel
-
-        user_requisites.user_details = data['user_details']
+        emp_channel.append(channel)
+        user_requisites.user_details = user_details[0]
         user_requisites.save()
-
+        for item in user_details[1::]:
+            requis = Empl_requisites.objects.create()
+            requis.employee = email
+            requis.channel = channel
+            requis.user_details = item
+            requis.save()
+        # for item in user_details:
         """ Функция для заполнения формы подписки   """
         subsc = Subscription.objects.create()
         user_data = User.objects.filter(email=request.user).values('id', 'email', 'notification_group')
+        ic(user_data)
         for item in user_data:
-            subsc.employee_requisites.add(Empl_requisites.objects.get(employee=item['id']))
-            subsc.notification_group.add(Notification_group.objects.get(id=item['notification_group']))
+            subsc.notification_group.add(item['notification_group'])
+            empl_requisites = Empl_requisites.objects.filter(employee=item['id'])
+            for item in empl_requisites:
+                subsc.employee_requisites.add(item)
         subsc.save()
         form = UserRegistrationForm(
-            initial={'email': user.email, 'notification_group': user.notification_group})  # выводит уже введённые данные
+            initial={'email': user.email,
+                     'notification_group': user.notification_group})  # выводит уже введённые данные
         return render(request, 'msg_sender/home.html',
                       {'form': form})
     return render(request, 'accounts/get_user_requisites.html', {'form': form})
@@ -173,12 +184,13 @@ def delete_view(request):
     return redirect('home')
 
 
-
 """Функция для сбора всех данных и отправка в сервисы для рассылки нотификаций
 """
 
-# TODO:пересмотреть сохранение, сохраняет только одного пользователя #Done!!
 
+# TODO:пересмотреть сохранение, сохраняет только одного пользователя #Done!!
+# TODO: Спросить у Ивана могут ли к нам попасть реквизиты залётных пользователей?
+# TODO: разделить отправку сообщений, либо добавиnm
 @csrf_exempt
 def save_to_result(request):
     if request.method == "POST":
@@ -195,7 +207,9 @@ def save_to_result(request):
                 # ntf_templates = NTF_type_for_channel.objects.filter(id=item['channel']).values('templates_for_massage')
                 # for template in ntf_templates:
                 #     ic(template['templates_for_massage'])
-                #     res_for_send.message = template['templates_for_massage']
+                #     res_for_send.message = template['templates_for_massage'].format(message=data['message'],
+                #                                                                                     created_at=data['created_at'],
+                #                                                                                     url=data['url']))
                 res_for_send.channels.add(channel_names)
                 res_for_send.status = data['status']
                 res_for_send.url = data['url']

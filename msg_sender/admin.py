@@ -58,10 +58,13 @@ class NTF_type_for_channelForm(forms.ModelForm):
 #     form = NTF_type_for_channelForm
 #     list_display = ('ntf_group', 'channel', 'templates_for_massage')
 
+class ChannelAdmin(admin.ModelAdmin):
+    form = NotificationForm
+    list_display = ('id','name')
 
 admin.site.register(Service, ServiceAdmin)
 admin.site.register(Notification_group, Notification_groupAdmin)
-admin.site.register(Channel)
+admin.site.register(Channel,ChannelAdmin)
 admin.site.register(Notification, NotificationAdmin)
 admin.site.register(NTF_type_for_channel, )
 

@@ -1,5 +1,5 @@
 import datetime
-
+import json
 import os, sys
 
 from django.contrib.auth import get_user_model
@@ -12,20 +12,23 @@ import django
 django.setup()
 
 # -------------------------------------------------------------------------------
-import json
+
 import time
 from django.core.mail import EmailMultiAlternatives, EmailMessage
-from msg_sender.models import Notification, Service, Result, Channel
-from accounts.models import Empl_requisites, MyUser
+from django.template.loader import render_to_string
+from msg_sender.models import Notification, Service, Channel
+
+from accounts.models import Empl_requisites, MyUser, Result
 from natification_service.settings import (
     EMAIL_HOST_USER
 )
 
-from msg_sender.views import ADMIN_USER
-from django.template.loader import render_to_string
+ADMIN_USER = EMAIL_HOST_USER
+#
+# # Возвращает пользователя по умолчанию
+User = get_user_model()
 
 results = Result.objects.filter(channels=Channel.objects.get(name='email')).exclude(sending_status='Ok')
-print(results)
 
 
 def handle(data, result):

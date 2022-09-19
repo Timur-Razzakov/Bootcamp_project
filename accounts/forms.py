@@ -78,7 +78,9 @@ class UserRequisitesForm(forms.ModelForm):
             widget=forms.Select(attrs={'class': 'form-control'}),
             label='Выберите канал, для которого хотите ввести реквизиты'
         )
-    user_details = forms.CharField(label='Введите свои реквизиты, через пробел',
+    user_details = forms.CharField(label='Введите свои реквизиты, через запятую.'
+                                         ' Если вы хотите получать через телеграмм,то введите свой channelID, '
+                                         'его можете найти с помощью "@getmyid_bot" этого бота.',
                                    widget=forms.TextInput(attrs={'class': 'form-control'}))
 
     class Meta:
