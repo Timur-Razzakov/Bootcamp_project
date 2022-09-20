@@ -1,5 +1,4 @@
 import datetime
-import json
 import os, sys
 
 from django.contrib.auth import get_user_model
@@ -13,12 +12,10 @@ django.setup()
 
 # -------------------------------------------------------------------------------
 
-import time
-from django.core.mail import EmailMultiAlternatives, EmailMessage
-from django.template.loader import render_to_string
-from msg_sender.models import Notification, Service, Channel
+from django.core.mail import EmailMessage
+from msg_sender.models import Channel, NTF_type_for_channel
 
-from accounts.models import Empl_requisites, MyUser, Result
+from accounts.models import Result
 from natification_service.settings import (
     EMAIL_HOST_USER
 )
@@ -28,38 +25,41 @@ ADMIN_USER = EMAIL_HOST_USER
 # # Возвращает пользователя по умолчанию
 User = get_user_model()
 
-results = Result.objects.filter(channels=Channel.objects.get(name='email')).exclude(sending_status='Ok')
+channel = Channel.objects.get(name='email')
+results = Result.objects.filter(channels=channel).exclude(sending_status='Ok')
+ntf_templates = NTF_type_for_channel.objects.get(channel=channel)
 
 
 def handle(data, result):
     subject = data['message_title']
-    content = data['message'] + '\n' + 'This notification received on: ' + data[
-        'created_at'] + '\n' + 'For more information, follow the link: ' + data['url']
+    content = ntf_templates.templates_for_massage.format(status=data['status'],
+                                                        message_title=data['message_title'],
+                                                        message=data['message'],
+                                                        url=data['url'],
+                                                        created_at=data['created_at'])
     print(content)
-    # html_content = render_to_string('mail/email.html', data)
     from_email = ADMIN_USER
-    to_send = []
-    emails = data['employee_details']
-    for key in emails:
-        to_send.append(emails[key])
-
+    to_send = data['employee_details']
     msg = EmailMessage(subject, content, from_email, to_send)
-    # msg.content_subtype = "html"
-    # msg.attach_alternative(html_content, "text/html")
     res = msg.send()
     result.sending_status = 'Ok'
+    result.process_date = datetime.date.today()
     result.save()
-
     print("Sended")
 
 
 for result in results:
+    employee_details = result.employee_details.all()
+    deteils_list = []
+    for detail in employee_details:
+        deteils_list.append(str(detail))
+
     data = {'message_title': result.message_title,
             'message': result.message,
             'status': result.status,
             'created_at': str(result.created_at),
             'url': result.url,
-            'employee_details': json.loads(result.employee_details.encode())
+            'employee_details': deteils_list
             }
 
     handle(data, result)

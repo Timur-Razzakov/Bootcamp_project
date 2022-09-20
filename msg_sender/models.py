@@ -3,7 +3,6 @@ from django.conf import settings
 from django.core import validators
 
 
-
 class Service(models.Model):
     service_names = models.CharField(verbose_name='service_name', max_length=255)
     image = models.ImageField(verbose_name=' images', upload_to='media/%Y/%m/%d', blank=True)
@@ -46,8 +45,9 @@ class Notification(models.Model):
 
 class NTF_type_for_channel(models.Model):
     ntf_group = models.ManyToManyField(Notification_group, blank=True)
-    channel = models.ManyToManyField(Channel, verbose_name='channel', blank=True)
+    channel = models.ForeignKey(Channel, verbose_name='channel', on_delete=models.CASCADE, null=True,
+                                blank=True)
     templates_for_massage = models.TextField(verbose_name='templates_for_massage')
 
     def __str__(self):
-        return self.templates_for_massage
+        return str(self.channel)

@@ -7,7 +7,7 @@ from icecream import ic
 from django.views.decorators.csrf import csrf_exempt
 from accounts.forms import UserLoginForm, UserRegistrationForm, UserRequisitesForm, Subscription, \
     UserUpdateForm
-from msg_sender.models import Channel, Notification_group
+from msg_sender.models import Channel, Notification_group, NTF_type_for_channel, Notification
 from django.contrib.auth.decorators import login_required
 
 User = get_user_model()
@@ -66,8 +66,8 @@ def register_view(request):
 def requisites_view(request):
     form = UserRequisitesForm(request.POST or None)
     user = request.user
-    emp_email =[]
-    emp_channel=[]
+    emp_email = []
+    emp_channel = []
     if form.is_valid():
         data = form.cleaned_data
         user_requisites = form.save(commit=False)
@@ -132,7 +132,7 @@ def update_view(request):
                 print(data)
                 user.email = data['email']
                 user.notification_group.set(data['notification_group'])
-                user.save()
+                # user.save()
                 messages.success(request, 'Данные сохранены.')
                 return redirect('update')
         form = UserRegistrationForm(
@@ -188,37 +188,51 @@ def delete_view(request):
 """
 
 
-# TODO:пересмотреть сохранение, сохраняет только одного пользователя #Done!!
-# TODO: Спросить у Ивана могут ли к нам попасть реквизиты залётных пользователей?
-# TODO: разделить отправку сообщений, либо добавиnm
+# channels = models.ForeignKey(Channel, on_delete=models.SET_NULL, verbose_name='channels for send',
+#                              null=True, blank=True)
+# message = models.TextField(verbose_name="Message")
+# employee_details = models.ManyToManyField(Empl_requisites, verbose_name="employee_requisites")
+# notification = models.ForeignKey(Notification, on_delete=models.SET_NULL, verbose_name="notification",
+#                                  null=True, blank=True)
+# status = models.CharField(verbose_name='Notification status', max_length=90)
+# sending_status = models.CharField(verbose_name='sending_status', max_length=90, null=True, blank=True)
+# message_title = models.CharField(verbose_name='massage_title', max_length=255, null=True, blank=True)
+# url = models.CharField(verbose_name='url', max_length=255, null=True, blank=True)
+# process_date = models.DateField(verbose_name='sent_to', null=True, blank=True)
+# created_at = models.DateField(verbose_name="created_at", null=True, blank=True)
+
+
 @csrf_exempt
 def save_to_result(request):
+    global ntf_templates
     if request.method == "POST":
         data = json.loads(request.body.decode())
         qs = Subscription.objects.filter(notification_group=data['notification_group']).values(
-            'employee_requisites', 'notification_group')
-        res_for_send = Result.objects.create()
+            'employee_requisites', 'notification_group', 'channels')
         for item in qs:
-            employee_requisite = Empl_requisites.objects.filter(id=item['employee_requisites']).values(
-                'channel', 'user_details')
-            for item in employee_requisite:
-                channel_names = Channel.objects.get(id=item['channel'])
-                employee_detail = Empl_requisites.objects.filter(user_details=item['user_details'])
-                for item in employee_detail:
-                    res_for_send.employee_details.add(item)
-                # ntf_templates = NTF_type_for_channel.objects.filter(id=item['channel']).values('templates_for_massage')
-                # for template in ntf_templates:
-                #     ic(template['templates_for_massage'])
-                #     res_for_send.message = template['templates_for_massage'].format(message=data['message'],
-                #                                                                                     created_at=data['created_at'],
-                #                                                                                     url=data['url']))
-                res_for_send.channels.add(channel_names)
-                res_for_send.status = data['status']
-                res_for_send.url = data['url']
-                res_for_send.created_at = data['created_at']
-                res_for_send.message_title = data['title']
-                res_for_send.message = data['message']
+            res_for_send = Result.objects.create()
+            channel_name = Channel.objects.get(id=item['channels'])
+            res_for_send.channels = channel_name
+            all_requisites = Empl_requisites.objects.filter(channel=channel_name)
+    # TODO: Нужно разделить данные, те, что есть и тех которые получил от внеш сервисов и отпр им сообщение тоже
+            # получаем реквизиты пользователя, переданные от внешних сервисов
+            empl_recipients = data['recipient']
+            for requisite in all_requisites:
+                res_for_send.employee_details.add(requisite)
+                # if str(requisite) in empl_recipients:
+                #     empl_recipients.remove(requisite)
+                #     ic(empl_recipients)
+            res_for_send.created_at = data['created_at']
+            ntf_templates = NTF_type_for_channel.objects.get(channel=item['channels'])
+
+            content = ntf_templates.templates_for_massage.format(message_title=data['title'],
+                                                             status=data['status'],
+                                                             message=data['message'],
+                                                             created_at=data['created_at'],
+                                                             url=data['url'])
+            res_for_send.message = content
             res_for_send.save()
 
         messages.success(request, 'Данные сохранены')
         return redirect('/')
+

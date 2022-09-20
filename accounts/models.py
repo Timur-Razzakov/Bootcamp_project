@@ -1,7 +1,7 @@
 from django.contrib.auth.base_user import AbstractBaseUser, BaseUserManager
 from django.db import models
 
-from msg_sender.models import Channel, NTF_type_for_channel, Notification_group
+from msg_sender.models import Channel, NTF_type_for_channel, Notification_group, Notification
 
 
 # class Employee(models.Model):
@@ -39,15 +39,12 @@ class Empl_requisites(models.Model):
 
 
 class Subscription(models.Model):
+    channels = models.ManyToManyField(Channel)
     notification_group = models.ManyToManyField(Notification_group)
-    employee_requisites = models.ManyToManyField(Empl_requisites)
+    employee_requisites = models.ForeignKey(Empl_requisites, on_delete=models.SET_NULL,
+                                            verbose_name='employee_requisites for send', null=True,
+                                            blank=True)
 
-    # service_name = models.ForeignKey(Service, verbose_name='service_name', on_delete=models.CASCADE,
-    #                                  null=True,
-    #                                  blank=True)
-    # employee_requisites = models.ForeignKey(Empl_requisites, verbose_name='employee_requisites',
-    #                                         on_delete=models.CASCADE, null=True,
-    #                                         blank=True)
     def __str__(self):
         return str(self.employee_requisites)
 
@@ -56,24 +53,20 @@ class Subscription(models.Model):
 
 
 class Result(models.Model):
-    channels = models.ManyToManyField(Channel, verbose_name='channels for send')
-    message = models.TextField(verbose_name="Message")
     employee_details = models.ManyToManyField(Empl_requisites, verbose_name="employee_requisites")
-    # employee_details = models.JSONField(verbose_name="employee_requisites", null=True, blank=True)
-    status = models.CharField(verbose_name='Notification status', max_length=90)
-    sending_status = models.CharField(verbose_name='sending_status', max_length=90, null=True, blank=True)
-    message_title = models.CharField(verbose_name='massage_title', max_length=255, null=True, blank=True)
-    url = models.CharField(verbose_name='url', max_length=255, null=True, blank=True)
-    process_date = models.DateField(verbose_name='sent_to', null=True, blank=True)
-    created_at = models.DateField(verbose_name="created_at", null=True, blank=True)
+    notification = models.ForeignKey(Notification, on_delete=models.SET_NULL, verbose_name="notification",
+                                     null=True, blank=True)
+    new_details = models.CharField(verbose_name='new_details', max_length=255, null=True, blank=True)
 
+    sending_status = models.CharField(verbose_name='sending_status', max_length=90, null=True, blank=True)#--
+    process_date = models.DateField(verbose_name='sent_to', null=True, blank=True)#--
+    created_at = models.DateField(verbose_name="created_at", null=True, blank=True)##
+    channels = models.ForeignKey(Channel, on_delete=models.SET_NULL, verbose_name='channels for send',
+                                 null=True, blank=True)##
+    message = models.TextField(verbose_name="Message")##
 
-"""    process_date_1 = models.DateField(verbose_name='sent_to_email', null=True, blank=True)
-    process_date_2 = models.DateField(verbose_name='sent_to_tg', null=True, blank=True"""
-
-
-def __str__(self):
-    return str(self.status)
+    def __str__(self):
+        return str(self.sending_status)
 
 
 class MyUserManager(BaseUserManager):
