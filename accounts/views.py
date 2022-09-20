@@ -203,7 +203,9 @@ def save_to_result(request):
                 'channel', 'user_details')
             for item in employee_requisite:
                 channel_names = Channel.objects.get(id=item['channel'])
-                employee_detail = Empl_requisites.objects.get(user_details=item['user_details'])
+                employee_detail = Empl_requisites.objects.filter(user_details=item['user_details'])
+                for item in employee_detail:
+                    res_for_send.employee_details.add(item)
                 # ntf_templates = NTF_type_for_channel.objects.filter(id=item['channel']).values('templates_for_massage')
                 # for template in ntf_templates:
                 #     ic(template['templates_for_massage'])
@@ -216,7 +218,6 @@ def save_to_result(request):
                 res_for_send.created_at = data['created_at']
                 res_for_send.message_title = data['title']
                 res_for_send.message = data['message']
-                res_for_send.employee_details.add(employee_detail)
             res_for_send.save()
 
         messages.success(request, 'Данные сохранены')

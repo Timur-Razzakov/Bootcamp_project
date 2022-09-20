@@ -80,7 +80,8 @@ class UserRequisitesForm(forms.ModelForm):
         )
     user_details = forms.CharField(label='Введите свои реквизиты, через запятую.'
                                          ' Если вы хотите получать через телеграмм,то введите свой channelID, '
-                                         'его можете найти с помощью "@getmyid_bot" этого бота.',
+                                         'его можете найти с помощью "@username_to_id_bot" этого бота.'
+                                         'Или введите ссылку канала, группы',
                                    widget=forms.TextInput(attrs={'class': 'form-control'}))
 
     class Meta:
