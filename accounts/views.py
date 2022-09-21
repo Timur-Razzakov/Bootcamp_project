@@ -87,12 +87,12 @@ def requisites_view(request):
                 requis.user_details = item
             requis.save()
         """ Функция для заполнения формы подписки   """
+        #TODO: сохранить channel в подписку!!
         subsc = Subscription.objects.create()
         user_data = User.objects.filter(email=request.user).values('id', 'email', 'notification_group')
         ic(user_data) #[{'id': 3, 'email': 'qurol.abdujalilov99@gmail.com', 'notification_group': 2}]>
         for item in user_data:
             subsc.notification_group.add(item['notification_group'])
-            # empl_requisites = Empl_requisites.objects.get(id=item['id'])
             subsc.employee_requisites = (Empl_requisites.objects.get(employee=item['id']))
             # subsc.channels = (Channel.objects.get(id=item['id']))
             subsc.save()
@@ -187,7 +187,7 @@ def delete_view(request):
 
 """Функция для сбора всех данных и отправка в сервисы для рассылки нотификаций
 """
-
+#TODO: Сохранить нотификации в result
 @csrf_exempt
 def save_to_result(request):
     global ntf_templates
