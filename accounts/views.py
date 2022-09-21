@@ -201,38 +201,36 @@ def delete_view(request):
 # process_date = models.DateField(verbose_name='sent_to', null=True, blank=True)
 # created_at = models.DateField(verbose_name="created_at", null=True, blank=True)
 
-
 @csrf_exempt
 def save_to_result(request):
     global ntf_templates
     if request.method == "POST":
         data = json.loads(request.body.decode())
-        qs = Subscription.objects.filter(notification_group=data['notification_group']).values(
-            'employee_requisites', 'notification_group', 'channels')
-        for item in qs:
+        channel_names = Channel.objects.all()
+        for channel_name in channel_names:
             res_for_send = Result.objects.create()
-            channel_name = Channel.objects.get(id=item['channels'])
             res_for_send.channels = channel_name
             all_requisites = Empl_requisites.objects.filter(channel=channel_name)
-    # TODO: Нужно разделить данные, те, что есть и тех которые получил от внеш сервисов и отпр им сообщение тоже
+            # TODO: Нужно разделить данные, те, что есть и тех которые получил от внеш сервисов и отпр им сообщение тоже
             # получаем реквизиты пользователя, переданные от внешних сервисов
-            empl_recipients = data['recipient']
+            # empl_recipients = data['recipient']
             for requisite in all_requisites:
                 res_for_send.employee_details.add(requisite)
                 # if str(requisite) in empl_recipients:
                 #     empl_recipients.remove(requisite)
                 #     ic(empl_recipients)
-            res_for_send.created_at = data['created_at']
-            ntf_templates = NTF_type_for_channel.objects.get(channel=item['channels'])
 
+            ntf_templates = NTF_type_for_channel.objects.get(channel=channel_name)
             content = ntf_templates.templates_for_massage.format(message_title=data['title'],
-                                                             status=data['status'],
-                                                             message=data['message'],
-                                                             created_at=data['created_at'],
-                                                             url=data['url'])
+                                                                 status=data['status'],
+                                                                 message=data['message'],
+                                                                 created_at=data['created_at'],
+                                                                 url=data['url'])
             res_for_send.message = content
+            res_for_send.created_at = data['created_at']
             res_for_send.save()
+
+
 
         messages.success(request, 'Данные сохранены')
         return redirect('/')
-

@@ -1,3 +1,4 @@
+import schedule
 import datetime
 import os, sys
 
@@ -13,7 +14,7 @@ django.setup()
 # -------------------------------------------------------------------------------
 
 from django.core.mail import EmailMessage
-from msg_sender.models import Channel, NTF_type_for_channel
+from msg_sender.models import Channel
 
 from accounts.models import Result
 from natification_service.settings import (
@@ -25,41 +26,52 @@ ADMIN_USER = EMAIL_HOST_USER
 # # Возвращает пользователя по умолчанию
 User = get_user_model()
 
-channel = Channel.objects.get(name='email')
-results = Result.objects.filter(channels=channel).exclude(sending_status='Ok')
-ntf_templates = NTF_type_for_channel.objects.get(channel=channel)
+
+def handle():
+    channel = Channel.objects.get(name='Email')
+    # Обращаемся в таблицу за новыми results по коду статус и по каналу связи
+    results = Result.objects.filter(channels=channel).exclude(sending_status='1')
+
+    # Тут перебираем каждую строку result и отправляем по отдельности
+    for result in results:
+        employee_details = result.employee_details.all()  # Из results извлекаем реквизиты
+
+        # Реквизиты записываем в список в виде строки, потому что EmailMessage в получатели принимает по списку
+        details = []
+        for detail in employee_details:
+            details.append(str(detail))
+
+            # Тут создаем аргументы для EmailMessage
+        subject = result.created_at
+        # subject = result.notification.message_title
+        content = result.message
+        from_email = ADMIN_USER
+        to_send = details
+
+        # Создаем экземпляр класса EmailMessage
+        msg = EmailMessage(subject, content, from_email, to_send)
+        res = msg.send()  # Отправляем
+
+        # Проверка отправки
+        if res:  # Если отправится изменяем статус на 1
+            result.sending_status = '1'
+            result.process_date = datetime.date.today()
+            result.save()
+            print("Sended")
+        else:  # Если не отправится изменяем статус на 2
+            result.sending_status = '2'
+            result.process_date = datetime.date.today()
+            result.save()
+            print("Not sended")
 
 
-def handle(data, result):
-    subject = data['message_title']
-    content = ntf_templates.templates_for_massage.format(status=data['status'],
-                                                        message_title=data['message_title'],
-                                                        message=data['message'],
-                                                        url=data['url'],
-                                                        created_at=data['created_at'])
-    print(content)
-    from_email = ADMIN_USER
-    to_send = data['employee_details']
-    msg = EmailMessage(subject, content, from_email, to_send)
-    res = msg.send()
-    result.sending_status = 'Ok'
-    result.process_date = datetime.date.today()
-    result.save()
-    print("Sended")
+def main():
+    # Это планировшик, он каждый n секунд(seconds)/минут(minutes) сможет запускать код
+    schedule.every(5).seconds.do(handle)
+
+    while True:
+        schedule.run_pending()
 
 
-for result in results:
-    employee_details = result.employee_details.all()
-    deteils_list = []
-    for detail in employee_details:
-        deteils_list.append(str(detail))
-
-    data = {'message_title': result.message_title,
-            'message': result.message,
-            'status': result.status,
-            'created_at': str(result.created_at),
-            'url': result.url,
-            'employee_details': deteils_list
-            }
-
-    handle(data, result)
+if __name__ == "__main__":
+    main()
