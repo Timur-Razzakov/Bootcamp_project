@@ -50,6 +50,7 @@ def handle():
 
         # Создаем экземпляр класса EmailMessage
         msg = EmailMessage(subject, content, from_email, to_send)
+        msg.content_subtype = "HTML"
         res = msg.send()  # Отправляем
 
         # Проверка отправки

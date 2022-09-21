@@ -16,7 +16,7 @@ class Channel(models.Model):
     name = models.CharField(verbose_name='channel_name', max_length=255)
 
     def __str__(self):
-        return str(self.pk)
+        return self.name
 
 
 class Notification_group(models.Model):

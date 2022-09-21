@@ -72,29 +72,30 @@ def requisites_view(request):
         data = form.cleaned_data
         user_requisites = form.save(commit=False)
         user_details = data['user_details'].split(',')
-        email = User.objects.get(email=data['employee'])
-        emp_email.append(email)
         channel = Channel.objects.get(name=data['channel'])
-        emp_channel.append(channel)
-        user_requisites.user_details = user_details[0]
-        user_requisites.save()
-        for item in user_details[1::]:
-            requis = Empl_requisites.objects.create()
-            requis.employee = email
-            requis.channel = channel
-            requis.user_details = item
+        email = User.objects.get(email=data['employee'])
+        if len(user_details) == 1:
+            user_requisites.user_details = user_details[0]
+            user_requisites.save()
+        else:
+            emp_email.append(email)
+            emp_channel.append(channel)
+            for item in user_details[1::]:
+                requis = Empl_requisites.objects.create()
+                requis.employee = email
+                requis.channel = channel
+                requis.user_details = item
             requis.save()
-        # for item in user_details:
         """ Функция для заполнения формы подписки   """
         subsc = Subscription.objects.create()
         user_data = User.objects.filter(email=request.user).values('id', 'email', 'notification_group')
-        ic(user_data)
+        ic(user_data) #[{'id': 3, 'email': 'qurol.abdujalilov99@gmail.com', 'notification_group': 2}]>
         for item in user_data:
             subsc.notification_group.add(item['notification_group'])
-            empl_requisites = Empl_requisites.objects.filter(employee=item['id'])
-            for item in empl_requisites:
-                subsc.employee_requisites.add(item)
-        subsc.save()
+            # empl_requisites = Empl_requisites.objects.get(id=item['id'])
+            subsc.employee_requisites = (Empl_requisites.objects.get(employee=item['id']))
+            # subsc.channels = (Channel.objects.get(id=item['id']))
+            subsc.save()
         form = UserRegistrationForm(
             initial={'email': user.email,
                      'notification_group': user.notification_group})  # выводит уже введённые данные
@@ -132,7 +133,7 @@ def update_view(request):
                 print(data)
                 user.email = data['email']
                 user.notification_group.set(data['notification_group'])
-                # user.save()
+                user.save()
                 messages.success(request, 'Данные сохранены.')
                 return redirect('update')
         form = UserRegistrationForm(
@@ -186,20 +187,6 @@ def delete_view(request):
 
 """Функция для сбора всех данных и отправка в сервисы для рассылки нотификаций
 """
-
-
-# channels = models.ForeignKey(Channel, on_delete=models.SET_NULL, verbose_name='channels for send',
-#                              null=True, blank=True)
-# message = models.TextField(verbose_name="Message")
-# employee_details = models.ManyToManyField(Empl_requisites, verbose_name="employee_requisites")
-# notification = models.ForeignKey(Notification, on_delete=models.SET_NULL, verbose_name="notification",
-#                                  null=True, blank=True)
-# status = models.CharField(verbose_name='Notification status', max_length=90)
-# sending_status = models.CharField(verbose_name='sending_status', max_length=90, null=True, blank=True)
-# message_title = models.CharField(verbose_name='massage_title', max_length=255, null=True, blank=True)
-# url = models.CharField(verbose_name='url', max_length=255, null=True, blank=True)
-# process_date = models.DateField(verbose_name='sent_to', null=True, blank=True)
-# created_at = models.DateField(verbose_name="created_at", null=True, blank=True)
 
 @csrf_exempt
 def save_to_result(request):
