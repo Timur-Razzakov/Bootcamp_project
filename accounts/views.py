@@ -72,30 +72,31 @@ def requisites_view(request):
         data = form.cleaned_data
         user_requisites = form.save(commit=False)
         user_details = data['user_details'].split(',')
-        channel = Channel.objects.get(name=data['channel'])
         email = User.objects.get(email=data['employee'])
-        if len(user_details) == 1:
-            user_requisites.user_details = user_details[0]
-            user_requisites.save()
-        else:
-            emp_email.append(email)
-            emp_channel.append(channel)
-            for item in user_details[1::]:
-                requis = Empl_requisites.objects.create()
-                requis.employee = email
-                requis.channel = channel
-                requis.user_details = item
+        emp_email.append(email)
+        channel = Channel.objects.get(name=data['channel'])
+        emp_channel.append(channel)
+        user_requisites.user_details = user_details[0]
+        user_requisites.save()
+        for item in user_details[1::]:
+            requis = Empl_requisites.objects.create()
+            requis.employee = email
+            requis.channel = channel
+            requis.user_details = item
             requis.save()
         """ Функция для заполнения формы подписки   """
-        #TODO: сохранить channel в подписку!!
         subsc = Subscription.objects.create()
         user_data = User.objects.filter(email=request.user).values('id', 'email', 'notification_group')
-        ic(user_data) #[{'id': 3, 'email': 'qurol.abdujalilov99@gmail.com', 'notification_group': 2}]>
         for item in user_data:
             subsc.notification_group.add(item['notification_group'])
-            subsc.employee_requisites = (Empl_requisites.objects.get(employee=item['id']))
-            # subsc.channels = (Channel.objects.get(id=item['id']))
-            subsc.save()
+            empl_requisites = Empl_requisites.objects.filter(employee=item['id']).values('id', 'channel')
+            ic(empl_requisites)
+            for item in empl_requisites:
+                ic(item['channel'])
+                subsc.employee_requisites.add(item['id'])
+                # subsc.employee_requisites.add(Empl_requisites.objects.get(employee=item['id']))
+                subsc.channels.add(Channel.objects.get(pk=item['channel']))
+        subsc.save()
         form = UserRegistrationForm(
             initial={'email': user.email,
                      'notification_group': user.notification_group})  # выводит уже введённые данные
@@ -187,7 +188,9 @@ def delete_view(request):
 
 """Функция для сбора всех данных и отправка в сервисы для рассылки нотификаций
 """
-#TODO: Сохранить нотификации в result
+
+
+# TODO: Сохранить нотификации в result
 @csrf_exempt
 def save_to_result(request):
     global ntf_templates
@@ -216,8 +219,6 @@ def save_to_result(request):
             res_for_send.message = content
             res_for_send.created_at = data['created_at']
             res_for_send.save()
-
-
 
         messages.success(request, 'Данные сохранены')
         return redirect('/')

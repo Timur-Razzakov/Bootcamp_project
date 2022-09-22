@@ -2,6 +2,7 @@ from django import forms
 from django.contrib.auth import get_user_model, authenticate
 from django.contrib.auth.hashers import check_password
 from django.contrib.auth.models import User
+from icecream import ic
 
 from msg_sender.models import Channel, Service, Notification_group
 from .models import Empl_requisites, Subscription
@@ -72,12 +73,12 @@ class UserRequisitesForm(forms.ModelForm):
         widget=forms.Select(attrs={'class': 'form-control'})
     )
     channel = forms.ModelChoiceField(
-            queryset=Channel.objects.all(),
-            to_field_name="name",
-            required=True,
-            widget=forms.Select(attrs={'class': 'form-control'}),
-            label='Выберите канал, для которого хотите ввести реквизиты'
-        )
+        queryset=Channel.objects.all(),
+        to_field_name="name",
+        required=True,
+        widget=forms.Select(attrs={'class': 'form-control'}),
+        label='Выберите канал, для которого хотите ввести реквизиты'
+    )
     user_details = forms.CharField(label='Введите свои реквизиты, через запятую.'
                                          ' Если вы хотите получать через телеграмм,то введите свой channelID, '
                                          'его можете найти с помощью "@username_to_id_bot" этого бота.'
@@ -87,6 +88,16 @@ class UserRequisitesForm(forms.ModelForm):
     class Meta:
         model = Empl_requisites
         fields = ('employee', 'channel', 'user_details')  # 'employee',
+
+    """Проверяем есть ли реквизиты"""
+    def clean(self, *args, **kwargs):
+        user_details = self.cleaned_data.get('user_details').split(',')
+        if user_details:
+            for item in user_details:
+                qs = Empl_requisites.objects.filter(user_details=item)
+                if qs.exists():
+                    raise forms.ValidationError('Реквизиты существуют')
+            return super(UserRequisitesForm, self).clean(*args, **kwargs)
 
 
 """Форма для заполнения подписки на сервисы"""

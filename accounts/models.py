@@ -41,9 +41,8 @@ class Empl_requisites(models.Model):
 class Subscription(models.Model):
     channels = models.ManyToManyField(Channel)
     notification_group = models.ManyToManyField(Notification_group)
-    employee_requisites = models.ForeignKey(Empl_requisites, on_delete=models.SET_NULL,
-                                            verbose_name='employee_requisites for send', null=True,
-                                            blank=True)
+    employee_requisites = models.ManyToManyField(Empl_requisites,
+                                            verbose_name='employee_requisites for send',)
 
     def __str__(self):
         return str(self.employee_requisites)
