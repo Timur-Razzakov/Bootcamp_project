@@ -86,15 +86,15 @@ def requisites_view(request):
             requis.save()
         """ Функция для заполнения формы подписки   """
         subsc = Subscription.objects.create()
-        user_data = User.objects.filter(email=request.user).values('id', 'email', 'notification_group')
+        user_data = User.objects.filter(email=request.user).values('id', 'notification_group')
+        ic(User.objects.get(email=request.user))
         for item in user_data:
+            subsc.employee = User.objects.get(pk=item['id'])
             subsc.notification_group.add(item['notification_group'])
-            empl_requisites = Empl_requisites.objects.filter(employee=item['id']).values('id', 'channel')
-            ic(empl_requisites)
+            empl_requisites = Empl_requisites.objects.filter(employee=item['id']).values('id', 'channel',
+                                                                                         )
             for item in empl_requisites:
-                ic(item['channel'])
                 subsc.employee_requisites.add(item['id'])
-                # subsc.employee_requisites.add(Empl_requisites.objects.get(employee=item['id']))
                 subsc.channels.add(Channel.objects.get(pk=item['channel']))
         subsc.save()
         form = UserRegistrationForm(
@@ -103,20 +103,6 @@ def requisites_view(request):
         return render(request, 'msg_sender/home.html',
                       {'form': form})
     return render(request, 'accounts/get_user_requisites.html', {'form': form})
-
-
-""" Функция для заполнения формы подписки   """
-
-# @login_required
-# def subscription_View(request):
-#     subsc = Subscription.objects.create()
-#     user_data = User.objects.filter(email=request.user).values('id', 'email', 'notification_group', 'channel')
-#     for item in user_data:
-#         subsc.employee = (User.objects.get(email=item['email']))
-#         subsc.employee_requisites.add(Empl_requisites.objects.get(employee=item['id']))
-#         subsc.channel.add(Channel.objects.get(id=item['channel']))
-#         subsc.notification_group.add(Notification_group.objects.get(id=item['notification_group']))
-#     subsc.save()
 
 
 """
@@ -186,7 +172,10 @@ def delete_view(request):
     return redirect('home')
 
 
-"""Функция для сбора всех данных и отправка в сервисы для рассылки нотификаций
+"""
+
+Функция для сбора всех данных и отправка в сервисы для рассылки нотификаций
+
 """
 
 

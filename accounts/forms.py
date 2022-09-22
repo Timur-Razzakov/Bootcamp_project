@@ -90,6 +90,7 @@ class UserRequisitesForm(forms.ModelForm):
         fields = ('employee', 'channel', 'user_details')  # 'employee',
 
     """Проверяем есть ли реквизиты"""
+
     def clean(self, *args, **kwargs):
         user_details = self.cleaned_data.get('user_details').split(',')
         if user_details:

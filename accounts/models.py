@@ -39,10 +39,12 @@ class Empl_requisites(models.Model):
 
 
 class Subscription(models.Model):
+    employee = models.ForeignKey('MyUser', verbose_name='employee', on_delete=models.CASCADE,
+                                 null=True, blank=True)
     channels = models.ManyToManyField(Channel)
     notification_group = models.ManyToManyField(Notification_group)
     employee_requisites = models.ManyToManyField(Empl_requisites,
-                                            verbose_name='employee_requisites for send',)
+                                                 verbose_name='employee_requisites for send', )
 
     def __str__(self):
         return str(self.employee_requisites)
@@ -55,14 +57,15 @@ class Result(models.Model):
     employee_details = models.ManyToManyField(Empl_requisites, verbose_name="employee_requisites")
     notification = models.ForeignKey(Notification, on_delete=models.SET_NULL, verbose_name="notification",
                                      null=True, blank=True)
-    new_details = models.CharField(verbose_name='new_details', max_length=255, null=True, blank=True)
+    # new_details = models.CharField(verbose_name='new_details', max_length=255, null=True, blank=True)
 
-    sending_status = models.CharField(verbose_name='sending_status', max_length=90, null=True, blank=True)#--
-    process_date = models.DateField(verbose_name='sent_to', null=True, blank=True)#--
-    created_at = models.DateField(verbose_name="created_at", null=True, blank=True)##
+    sending_status = models.CharField(verbose_name='sending_status', max_length=90, null=True,
+                                      blank=True)  # --
+    process_date = models.DateField(verbose_name='sent_to', null=True, blank=True)  # --
+    created_at = models.DateField(verbose_name="created_at", null=True, blank=True)  ##
     channels = models.ForeignKey(Channel, on_delete=models.SET_NULL, verbose_name='channels for send',
-                                 null=True, blank=True)##
-    message = models.TextField(verbose_name="Message")##
+                                 null=True, blank=True)  ##
+    message = models.TextField(verbose_name="Message")  ##
 
     def __str__(self):
         return str(self.sending_status)
