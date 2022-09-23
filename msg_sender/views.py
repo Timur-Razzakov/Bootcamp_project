@@ -28,12 +28,13 @@ ADMIN_USER = EMAIL_HOST_USER
 
 
 # TODO: добавить json для отправки имаил от внешних сервисов и распаковка на нашем
-# TODO: разобраться с шаблонами и вставка в них сообщений
+# TODO: разобраться с шаблонами и вставка в них сообщений Done
 
 @csrf_exempt
 def receive(request):
     if request.method == "POST":
         data = json.loads(request.body.decode())
+
         ntf_group = Notification_group.objects.get(id=data["notification_group"])
         ntf = Notification.objects.create()
         ntf.title = data["title"]
@@ -44,7 +45,7 @@ def receive(request):
         ntf.ntf_group = ntf_group
         # for item in data["recipient"]:
         ntf.recipient = data["recipient"]
-        ntf.save()
+        # ntf.save()
         ic('Данные сохранены.')
         messages.success(request, 'Данные сохранены.')
         return redirect('/')

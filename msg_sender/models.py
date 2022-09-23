@@ -30,12 +30,12 @@ class Notification_group(models.Model):
 
 
 class Notification(models.Model):
-    title = models.CharField(verbose_name='title', max_length=100)
-    status = models.CharField(verbose_name='Notification Status', max_length=30)
+    title = models.CharField(verbose_name='title', max_length=100, blank=True, null=True)
+    status = models.CharField(verbose_name='Notification Status', max_length=30, blank=True, null=True)
     ntf_group = models.ForeignKey(Notification_group, verbose_name='ntf_group', on_delete=models.CASCADE,
                                   blank=True, null=True)
-    url = models.CharField(verbose_name='url', max_length=30)
-    message = models.TextField(verbose_name='Message')
+    url = models.CharField(verbose_name='url', max_length=30, blank=True, null=True)
+    message = models.TextField(verbose_name='Message', blank=True, null=True)
     created_at = models.DateField(verbose_name=("created_at"), auto_now_add=True)
     recipient = models.TextField(verbose_name="employee_recipient", null=True, blank=True)
 

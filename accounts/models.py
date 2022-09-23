@@ -43,11 +43,11 @@ class Subscription(models.Model):
                                  null=True, blank=True)
     channels = models.ManyToManyField(Channel)
     notification_group = models.ManyToManyField(Notification_group)
-    employee_requisites = models.ManyToManyField(Empl_requisites,
-                                                 verbose_name='employee_requisites for send', )
+    # employee_requisites = models.ManyToManyField(Empl_requisites,
+    #                                              verbose_name='employee_requisites for send', )
 
     def __str__(self):
-        return str(self.employee_requisites)
+        return str(self.employee)
 
 
 """Модель для итоговых данных"""

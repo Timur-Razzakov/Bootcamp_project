@@ -66,6 +66,7 @@ def register_view(request):
 def requisites_view(request):
     form = UserRequisitesForm(request.POST or None)
     user = request.user
+    ic(user)
     emp_email = []
     emp_channel = []
     if form.is_valid():
@@ -94,7 +95,7 @@ def requisites_view(request):
             empl_requisites = Empl_requisites.objects.filter(employee=item['id']).values('id', 'channel',
                                                                                          )
             for item in empl_requisites:
-                subsc.employee_requisites.add(item['id'])
+                # subsc.employee_requisites.add(item['id'])
                 subsc.channels.add(Channel.objects.get(pk=item['channel']))
         subsc.save()
         form = UserRegistrationForm(
@@ -186,7 +187,7 @@ def save_to_result(request):
     if request.method == "POST":
         data = json.loads(request.body.decode())
         channel_names = Channel.objects.all()
-        for channel_name in channel_names:
+        for channel_name in channel_names:  # tg
             res_for_send = Result.objects.create()
             res_for_send.channels = channel_name
             all_requisites = Empl_requisites.objects.filter(channel=channel_name)

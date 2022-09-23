@@ -92,13 +92,19 @@ class UserRequisitesForm(forms.ModelForm):
     """Проверяем есть ли реквизиты"""
 
     def clean(self, *args, **kwargs):
+        channel = self.cleaned_data.get('channel')
         user_details = self.cleaned_data.get('user_details').split(',')
         if user_details:
-            for item in user_details:
-                qs = Empl_requisites.objects.filter(user_details=item)
-                if qs.exists():
-                    raise forms.ValidationError('Реквизиты существуют')
-            return super(UserRequisitesForm, self).clean(*args, **kwargs)
+            if channel == 'email':
+                for item in user_details:
+
+                    qs = Empl_requisites.objects.filter(user_details=item).exclude(user_details__startswith='-')
+                    if qs.exists():
+                        raise forms.ValidationError('Реквизиты существуют')
+                return super(UserRequisitesForm, self).clean(*args, **kwargs)
+
+
+
 
 
 """Форма для заполнения подписки на сервисы"""
