@@ -3,7 +3,7 @@ from django.contrib.auth import get_user_model, authenticate
 from django.contrib.auth.hashers import check_password
 from django.contrib.auth.models import User
 from icecream import ic
-
+import re
 from msg_sender.models import Channel, Service, Notification_group
 from .models import Empl_requisites, Subscription
 
@@ -89,48 +89,38 @@ class UserRequisitesForm(forms.ModelForm):
         model = Empl_requisites
         fields = ('employee', 'channel', 'user_details')  # 'employee',
 
-    """Проверяем есть ли реквизиты"""
+    """Проверяем есть ли реквизиты и производим проверку,
+        на верность указанных данных, относительно канала"""
 
     def clean(self, *args, **kwargs):
-        channel = self.cleaned_data.get('channel')
+        pattern = r"^[-\w\.]+@([-\w]+\.)+[-\w]{2,4}$"
+        channels = self.cleaned_data.get('channel')
         user_details = self.cleaned_data.get('user_details').split(',')
         if user_details:
-            if channel == 'email':
-                for item in user_details:
+            for item in user_details:
+                if channels.name == 'Email' and re.match(pattern, item) is not None \
+                        or channels.name.startswith('Telegram') and item.isdigit():
 
-                    qs = Empl_requisites.objects.filter(user_details=item).exclude(user_details__startswith='-')
+                    qs = Empl_requisites.objects.filter(user_details=item).exclude(
+                        user_details__startswith='-')
                     if qs.exists():
                         raise forms.ValidationError('Реквизиты существуют')
-                return super(UserRequisitesForm, self).clean(*args, **kwargs)
-
-
-
-
-
-"""Форма для заполнения подписки на сервисы"""
-
-#
-# class SubscriptionForm(forms.Form):
-#     """создаём форму для подписки"""
-#     service_name = forms.ModelMultipleChoiceField(
-#         queryset=Subscription.objects.all(),
-#         required=True,
-#         widget=forms.Select(attrs={'class': 'form-control'})
-#     )
-#
-#     class Meta:
-#         model = Subscription
-#         fields = ('employee', 'service_name', 'channel', 'employee_requisites',)
+                else:
+                    raise forms.ValidationError('Реквизиты не соответствуют  '
+                                                'указанному каналу!!')
+            return super(UserRequisitesForm, self).clean(*args, **kwargs)
 
 
 """
 Форма для обновления указанных данных пользователем
 """
 
-
-class UserUpdateForm(forms.Form, UserRequisitesForm, UserRegistrationForm):
-    old_password = forms.CharField(label='Введите пароль',
-                                   widget=forms.PasswordInput(attrs={'class': 'form-control'}))
+class UserUpdateForm(forms.ModelForm):
+    pass
+#
+# class UserUpdateForm(forms.Form, UserRequisitesForm, UserRegistrationForm):
+#     old_password = forms.CharField(label='Введите пароль',
+#                                    widget=forms.PasswordInput(attrs={'class': 'form-control'}))
 
 #
 # class UserUpdateForm(forms.Form):
@@ -152,7 +142,7 @@ class UserUpdateForm(forms.Form, UserRequisitesForm, UserRegistrationForm):
 #     )
 #     old_password = forms.CharField(label='Введите пароль',
 #                                    widget=forms.PasswordInput(attrs={'class': 'form-control'}))
-
+#
 #     class Meta:
 #         model = User
 #         fields = ('email', 'channel', 'notification_group', 'old_password', 'password', 'password2')

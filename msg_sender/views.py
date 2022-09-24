@@ -27,9 +27,6 @@ User = get_user_model()
 ADMIN_USER = EMAIL_HOST_USER
 
 
-# TODO: добавить json для отправки имаил от внешних сервисов и распаковка на нашем
-# TODO: разобраться с шаблонами и вставка в них сообщений Done
-
 @csrf_exempt
 def receive(request):
     if request.method == "POST":

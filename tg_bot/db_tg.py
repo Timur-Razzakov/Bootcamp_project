@@ -14,7 +14,7 @@ os.environ.setdefault("DJANGO_SETTINGS_MODULE", "natification_service.settings")
 import django
 
 django.setup()
-# # TODO: разобраться с разделением листа с реквизитами и отправка
+
 # # -------------------------------------------------------------------------------
 
 
@@ -29,7 +29,7 @@ from msg_sender.models import Channel
 # объявляем массив сообщений и CHAT_ID
 CHAT_ID = []
 data_send = []
-#получаем нужные данные
+# получаем нужные данные
 channels = Channel.objects.filter(name__startswith='telegram').values('pk')
 for item in channels:
     qs = Result.objects.filter(channels=item['pk']).exclude(sending_status='Ok').values(
