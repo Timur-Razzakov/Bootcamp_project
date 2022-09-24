@@ -118,14 +118,23 @@ def update_view(request):
             form = UserUpdateForm(request.POST)
             if form.is_valid():
                 data = form.cleaned_data
-                print(data)
                 user.email = data['email']
                 user.notification_group.set(data['notification_group'])
-                user.save()
+                # for item in data['notification_group']:
+                #     user.notification_group.add(Notification_group.objects.get(group_name=item))
+                c_user = authenticate(email=data['email'], password=data['current_password'])
+                ic(c_user)
+                if c_user is not None:
+                    ic('Неверный....')
+                else:
+                    user.receiver = data['receiver']
+                    user.set_password(form.cleaned_data['password'])  # ЗАШИФРОВЫВАЕТ пароль
+                    user.save()
                 messages.success(request, 'Данные сохранены.')
                 return redirect('update')
-        form = UserRegistrationForm(
-            initial={'email': user.email})  # выводит уже введённые данные
+        form = UserUpdateForm(
+            initial={'email': user.email,
+                     'receiver': user.receiver})  # выводит уже введённые данные
         return render(request, 'accounts/update.html',
                       {'form': form, })
     else:

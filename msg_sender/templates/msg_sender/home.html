@@ -31,7 +31,7 @@
                             <text x="50%" y="50%" fill="#eceeef" dy=".3em">1.Service</text>
                         </svg>
 
-                        <div class="card-body">
+                        {% comment %} <div class="card-body"> <!--old-->
                             {% autoescape off %}
                             <p class="card-text">{{service.description|slice:100}}...</p>
                             {% endautoescape %}
@@ -48,7 +48,51 @@
                                 {% endif %}
                                 </div>
                             </div>
+                        </div> {% endcomment %}
+
+                        <div class="card-body">
+                            {% autoescape off %}
+                            <p class="card-text">{{service.description|slice:100}}...</p>
+                            {% endautoescape %}
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div>
+                                    {% if user.is_authenticated %}
+                                    <p class="card-text">Notification groups: </p>
+                                        {% for notification_gr in notification_groups %}
+                                            {% if service == notification_gr.service_name %}
+                                                <div class="d-flex justify-content-between">
+                                                    {{ notification_gr.group_name }}
+
+                                                    {% if notification_gr in subscripton.notification_group.all %}
+                                                        <form action="{% url 'unsubscribe' notification_gr.id %}" method="get">
+                                                            <button type="submit" class="btn btn-secondary btn-sm">
+                                                                 Отписаться
+                                                            </button>
+                                                        </form>
+                                                    {% else %}
+                                                        <form action="{% url 'subscribe' notification_gr.id %}" method="get">
+                                                            <button type="submit" class="btn btn-primary btn-sm">
+                                                                Подписаться
+                                                            </button>
+                                                        </form>
+                                                    {% endif %}
+                                                </div>
+                                            {% endif %}
+                                        {% endfor %}
+                                        <br>
+
+                                        <form action="" method="get">
+                                            <button type="submit" class="btn btn-sm btn-outline-secondary">подробнее
+                                            </button>
+                                        </form>
+
+                                    {% else %}
+                                        <p> <a href="{% url 'login' %}" class="btn btn-primary my-3">Сначала авторизуйтесь, чтобы подписаться</a></p>
+                                    {% endif %}
+                                </div>
+                            </div>
                         </div>
+
                     </div>
                 </div>
                 {% endfor %}

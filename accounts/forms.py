@@ -115,14 +115,20 @@ class UserRequisitesForm(forms.ModelForm):
 Форма для обновления указанных данных пользователем
 """
 
-class UserUpdateForm(forms.ModelForm):
-    pass
-#
-# class UserUpdateForm(forms.Form, UserRequisitesForm, UserRegistrationForm):
-#     old_password = forms.CharField(label='Введите пароль',
-#                                    widget=forms.PasswordInput(attrs={'class': 'form-control'}))
 
-#
+class UserUpdateForm(UserRegistrationForm):
+    current_password = forms.CharField(label='Введите текущий пароль',
+                                       widget=forms.PasswordInput(attrs={'class': 'form-control'}))
+    field_order = ('email', 'channel', 'notification_group', 'current_password',
+
+                   'password', 'password2', 'receiver')
+
+    def clean_password2(self):
+        data = self.cleaned_data
+        if data['password'] != data['password2']:
+            raise forms.ValidationError('Пароли не совпадают!')
+        return data['password2']
+
 # class UserUpdateForm(forms.Form):
 #     email = forms.EmailField(label='Введите email',
 #                              widget=forms.EmailInput(attrs={'class': 'form-control'}))

@@ -18,7 +18,16 @@ from .models import Service, Channel, Notification_group, Notification, NTF_type
 
 def home_view(request):
     services = Service.objects.all()
-    return render(request, 'msg_sender/home.html', {'services': services})
+    notification_groups = Notification_group.objects.all()
+    try:
+        user = User.objects.get(email=request.user)
+        subscripton = Subscription.objects.get(employee=user)
+        context = {'services': services, 'notification_groups': notification_groups, 'subscripton': subscripton}
+    except:
+        context = {'services': services, 'notification_groups': notification_groups}
+
+    return render(request, 'msg_sender/home.html', context)
+
 
 
 """ Получаем данные из внешнего сервиса и сохраняем в бд"""
@@ -66,3 +75,28 @@ def ntf_templates_view(request):
         return render(request, 'msg_sender/my_templates.html',
                       {'new_ntf_templates': new_ntf_templates})  # 'accounts/login.html'
     return render(request, 'msg_sender/add_ntf_templates.html', {'form': form})
+
+
+def subscribe(request, pk):
+    try:
+        user = User.objects.get(email=request.user)
+        ic(user)
+        subscripton = Subscription.objects.get(employee=user)
+        notification_group = Notification_group.objects.get(id=pk)
+        subscripton.notification_group.add(notification_group)
+        subscripton.save()
+    except:
+        print("Wrong")
+    return redirect('/')
+
+
+def unsubscribe(request, pk):
+    try:
+        user = User.objects.get(email=request.user)
+        subscripton = Subscription.objects.get(employee=user)
+        notification_group = Notification_group.objects.get(id=pk)
+        subscripton.notification_group.remove(notification_group)
+        subscripton.save()
+    except:
+        print("Wrong")
+    return redirect('/')
