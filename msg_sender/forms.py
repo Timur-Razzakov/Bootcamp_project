@@ -23,7 +23,7 @@ class NotificationForm(forms.Form):
 class NTF_typeForm(forms.ModelForm):
     ntf_group = forms.ModelMultipleChoiceField(
         label='Выберите группу нотификации, для который хотите добавить шаблон',
-        queryset=Notification_group.objects.all(),
+        queryset=Notification_group.objects.all().values('group_name'),
         required=True,
         widget=forms.SelectMultiple(attrs={'class': 'form-control'})
     )

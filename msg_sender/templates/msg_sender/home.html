@@ -5,43 +5,52 @@
     <section class="jumbotron text-center">
         <div class="container">
             <h1>Bootcamp project</h1>
-            <p class="lead text-muted">Список сервисов, на которые вы можете подписать и получать
+            <p class="lead text-muted">Список Нотификационных групп, на которые вы можете подписать и получать
                 уведомления!! </p>
-            <!--            <p>-->
-            <!--                <a href="#" class="btn btn-primary my-2">first button</a>-->
-            <!--                <a href="#" class="btn btn-secondary my-2">second button</a>-->
-            <!--            </p>-->
         </div>
     </section>
 
 
-    {% if services %}
+    {% if notification_groups %}
 
     <div class="album py-5 bg-light">
         <div class="container">
             <div class="row">
-                {% for service in services %}
+                {% for ntf_group in notification_groups %}
                 <div class="col-md-4">
                     <div class="card mb-4 shadow-sm">
+                        <div class="text-center"><h4>{{ntf_group.group_name}}</h4></div>
                         <svg class="bd-placeholder-img card-img-top" width="100%" height="225"
                              xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Placeholder: Thumbnail"
                              preserveAspectRatio="xMidYMid slice" focusable="false"><title>
-                            {{service.service_names}}</title>
+                            {{ntf_group.group_name}}</title>
                             <rect width="100%" height="100%" fill="#55595c"/>
-                            <text x="50%" y="50%" fill="#eceeef" dy=".3em">1.Service</text>
+                            <image href="https://volumeintegration.com/wp-content/uploads/PackageIcon.png"
+                                   width="100%" height="225"/>
+
                         </svg>
 
-                        {% comment %}
-                        <div class="card-body"> <!--old-->
+                        <div class="card-body">
                             {% autoescape off %}
-                            <p class="card-text">{{service.description|slice:100}}...</p>
+                            <p class="card-text">{{ntf_group.description|slice:100}}...</p>
                             {% endautoescape %}
                             <div class="d-flex justify-content-between align-items-center">
                                 <div class="btn-group">
                                     {% if user.is_authenticated %}
-                                    <button type="button" class="btn btn-sm btn-outline-secondary">
-                                        Подписаться/отписаться
-                                    </button>
+                                    {% if ntf_group in subscripton.notification_group.all %}
+                                    <form action="{% url 'unsubscribe' ntf_group.id %}" method="get">
+                                        <button type="submit" class="btn btn-secondary btn-sm">
+                                            Отписаться
+                                        </button>
+                                    </form>
+                                    {% else %}
+                                    <form action="{% url 'subscribe' ntf_group.id %}" method="get">
+                                        <button type="submit" class="btn btn-sm btn-outline-secondary">
+                                            Подписаться
+                                        </button>
+                                    </form>
+                                    {% endif %}
+
                                     <button type="button" class="btn btn-sm btn-outline-secondary">подробнее
                                     </button>
                                     {% else %}
@@ -51,54 +60,6 @@
                                 </div>
                             </div>
                         </div>
-                        {% endcomment %}
-
-                        <div class="card-body">
-                            {% autoescape off %}
-                            <p class="card-text">{{service.description|slice:100}}...</p>
-                            {% endautoescape %}
-                            <div class="d-flex justify-content-between align-items-center">
-                                <div>
-                                    {% if user.is_authenticated %}
-                                    <p class="card-text">Notification groups: </p>
-                                    {% for notification_gr in notification_groups %}
-                                    {% if service == notification_gr.service_name %}
-                                    <div class="d-flex justify-content-between">
-                                        {{ notification_gr.group_name }}
-
-                                        {% if notification_gr in subscripton.notification_group.all %}
-                                        <form action="{% url 'unsubscribe' notification_gr.id %}"
-                                              method="get">
-                                            <button type="submit" class="btn btn-secondary btn-sm">
-                                                Отписаться
-                                            </button>
-                                        </form>
-                                        {% else %}
-                                        <form action="{% url 'subscribe' notification_gr.id %}" method="get">
-                                            <button type="submit" class="btn btn-primary btn-sm">
-                                                Подписаться
-                                            </button>
-                                        </form>
-                                        {% endif %}
-                                    </div>
-                                    {% endif %}
-                                    {% endfor %}
-                                    <br>
-
-                                    <form action="" method="get">
-                                        <button type="submit" class="btn btn-sm btn-outline-secondary">
-                                            подробнее
-                                        </button>
-                                    </form>
-
-                                    {% else %}
-                                    <p><a href="{% url 'login' %}" class="btn btn-primary my-3">Сначала
-                                        авторизуйтесь, чтобы подписаться</a></p>
-                                    {% endif %}
-                                </div>
-                            </div>
-                        </div>
-
                     </div>
                 </div>
                 {% endfor %}
