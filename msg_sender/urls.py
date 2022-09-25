@@ -9,5 +9,4 @@ urlpatterns = [
     path('unsubscribe/<int:pk>/', unsubscribe, name='unsubscribe'),
     path('add_ntf_templates/', ntf_templates_view, name='add_ntf_templates')
 
-
 ]

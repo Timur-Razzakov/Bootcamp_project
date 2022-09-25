@@ -1,6 +1,4 @@
 from django.db import models
-from django.conf import settings
-from django.core import validators
 
 
 class Service(models.Model):
@@ -26,7 +24,7 @@ class Notification_group(models.Model):
     description = models.TextField(verbose_name='description_ntf_group', max_length=255)
 
     def __str__(self):
-        return self.group_name
+        return str(self.pk)
 
 
 class Notification(models.Model):
@@ -50,4 +48,4 @@ class NTF_type_for_channel(models.Model):
     templates_for_massage = models.TextField(verbose_name='templates_for_massage')
 
     def __str__(self):
-        return str(self.channel)
+        return str(self.ntf_group)

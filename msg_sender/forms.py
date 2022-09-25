@@ -28,11 +28,11 @@ class NTF_typeForm(forms.ModelForm):
         widget=forms.SelectMultiple(attrs={'class': 'form-control'})
     )
 
-    channel = forms.ModelMultipleChoiceField(
+    channel = forms.ModelChoiceField(
         queryset=Channel.objects.all(),
         to_field_name="name",
         required=True,
-        widget=forms.SelectMultiple(attrs={'class': 'form-control'}),
+        widget=forms.Select(attrs={'class': 'form-control'}),
         label='Выберите канал,для которого хотите добавить шаблон'
     )
     templates_for_massage = forms.CharField(

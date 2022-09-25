@@ -1,11 +1,12 @@
+import re
+
 from django import forms
 from django.contrib.auth import get_user_model, authenticate
 from django.contrib.auth.hashers import check_password
 from django.contrib.auth.models import User
-from icecream import ic
-import re
-from msg_sender.models import Channel, Service, Notification_group
-from .models import Empl_requisites, Subscription
+
+from msg_sender.models import Channel, Notification_group
+from .models import Empl_requisites
 
 User = get_user_model()
 
@@ -118,41 +119,15 @@ class UserRequisitesForm(forms.ModelForm):
 
 class UserUpdateForm(UserRegistrationForm):
     current_password = forms.CharField(label='Введите текущий пароль',
-                                       widget=forms.PasswordInput(attrs={'class': 'form-control'}))
+                                    widget=forms.PasswordInput(attrs={'class': 'form-control'}))
     field_order = ('email', 'channel', 'notification_group', 'current_password',
-
-                   'password', 'password2', 'receiver')
+                'password', 'password2', 'receiver')
 
     def clean_password2(self):
         data = self.cleaned_data
         if data['password'] != data['password2']:
             raise forms.ValidationError('Пароли не совпадают!')
         return data['password2']
-
-# class UserUpdateForm(forms.Form):
-#     email = forms.EmailField(label='Введите email',
-#                              widget=forms.EmailInput(attrs={'class': 'form-control'}))
-#     channel = forms.ModelMultipleChoiceField(
-#         queryset=Channel.objects.all(),
-#         to_field_name="name",
-#         required=True,
-#         widget=forms.SelectMultiple(attrs={'class': 'form-control'}),
-#         label='Выберите каналы, на которые хотите получать уведомления'
-#     )
-#     notification_group = forms.ModelMultipleChoiceField(
-#         queryset=Notification_group.objects.all(),
-#         to_field_name="group_name",
-#         required=True,
-#         widget=forms.SelectMultiple(attrs={'class': 'form-control'}),
-#         label='Выберите группу нотификации, от которой хотите получать уведомления'
-#     )
-#     old_password = forms.CharField(label='Введите пароль',
-#                                    widget=forms.PasswordInput(attrs={'class': 'form-control'}))
-#
-#     class Meta:
-#         model = User
-#         fields = ('email', 'channel', 'notification_group', 'old_password', 'password', 'password2')
-
 
 # class RequisitesForm(forms.Form):
 #     tg_nickname = forms.CharField(

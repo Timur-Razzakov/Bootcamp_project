@@ -4,7 +4,7 @@ import os, sys
 
 from django.contrib.auth import get_user_model
 
-proj = os.path.dirname(os.path.abspath('manage.py'))
+proj = os.path.dirname(os.path.abspath('../manage.py'))
 sys.path.append(proj)
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "natification_service.settings")
 import django
@@ -31,7 +31,7 @@ def handle():
     channel = Channel.objects.get(name='Email')
     # Обращаемся в таблицу за новыми results по коду статус и по каналу связи
     results = Result.objects.filter(channels=channel).exclude(sending_status='1')
-
+    print('Данные не найдены...')
     # Тут перебираем каждую строку result и отправляем по отдельности
     for result in results:
         employee_details = result.employee_details.all()  # Из results извлекаем реквизиты

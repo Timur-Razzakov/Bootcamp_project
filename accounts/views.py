@@ -1,14 +1,15 @@
 import json
 
-from django.shortcuts import render, redirect
-from django.contrib.auth import authenticate, login, logout, get_user_model
 from django.contrib import messages
-from icecream import ic
-from django.views.decorators.csrf import csrf_exempt
-from accounts.forms import UserLoginForm, UserRegistrationForm, UserRequisitesForm, Subscription, \
-    UserUpdateForm
-from msg_sender.models import Channel, Notification_group, NTF_type_for_channel, Notification
+from django.contrib.auth import authenticate, login, logout, get_user_model
 from django.contrib.auth.decorators import login_required
+from django.shortcuts import render, redirect
+from django.views.decorators.csrf import csrf_exempt
+from icecream import ic
+from jinja2 import Template
+
+from accounts.forms import UserLoginForm, UserRegistrationForm, UserRequisitesForm, UserUpdateForm
+from msg_sender.models import Channel, Notification_group, NTF_type_for_channel
 
 User = get_user_model()
 from .models import Empl_requisites, Subscription, Result
@@ -195,27 +196,23 @@ def save_to_result(request):
     global ntf_templates
     if request.method == "POST":
         data = json.loads(request.body.decode())
+        ntf_group = Notification_group.objects.get(pk=data['notification_group'])
         channel_names = Channel.objects.all()
         for channel_name in channel_names:  # tg
             res_for_send = Result.objects.create()
             res_for_send.channels = channel_name
             all_requisites = Empl_requisites.objects.filter(channel=channel_name)
-            # TODO: Нужно разделить данные, те, что есть и тех которые получил от внеш сервисов и отпр им сообщение тоже
-            # получаем реквизиты пользователя, переданные от внешних сервисов
-            # empl_recipients = data['recipient']
             for requisite in all_requisites:
                 res_for_send.employee_details.add(requisite)
-                # if str(requisite) in empl_recipients:
-                #     empl_recipients.remove(requisite)
-                #     ic(empl_recipients)
-
-            ntf_templates = NTF_type_for_channel.objects.get(channel=channel_name)
-            content = ntf_templates.templates_for_massage.format(message_title=data['title'],
-                                                                 status=data['status'],
-                                                                 message=data['message'],
-                                                                 created_at=data['created_at'],
-                                                                 url=data['url'])
-            res_for_send.message = content
+            templates = NTF_type_for_channel.objects.get(channel=channel_name,
+                                                         ntf_group=ntf_group)
+            tm_message = Template(templates.templates_for_massage)
+            msg = tm_message.render(message_title=data['title'],
+                                    status=data['status'],
+                                    message=data['message'],
+                                    created_at=data['created_at'],
+                                    url=data['url'])
+            res_for_send.message = msg
             res_for_send.created_at = data['created_at']
             res_for_send.save()
 

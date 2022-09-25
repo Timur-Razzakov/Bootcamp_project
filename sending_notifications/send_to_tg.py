@@ -2,6 +2,7 @@ import os
 import sys
 
 import schedule
+from icecream import ic
 
 proj = os.path.dirname(os.path.abspath('../manage.py'))
 sys.path.append(proj)
@@ -43,18 +44,23 @@ def sent_ntf():
     channel = Channel.objects.get(name='Telegram')
     # Обращаемся в таблицу за новыми results по коду статус и по каналу связи
     results = Result.objects.filter(channels=channel).exclude(sending_status='1')
+    ic(results)
     print('Данные не найдены...')
     for result in results:
+        ic(result)
         employee_details = result.employee_details.all()  # Из results извлекаем реквизиты
+        ic(employee_details)
         for detail in employee_details:
             params = {
                 "chat_id": detail,
                 "text": result.message,
                 "parse_mode": "HTML"
             }
+            ic(params)
             url_req = "https://api.telegram.org/bot" \
                       + token + "/sendMessage"
             reg = requests.get(url_req, params=params)
+            ic(reg)
         # Проверка отправки
         if reg:  # Если успешно, статус-1
             result.sending_status = '1'

@@ -1,19 +1,17 @@
-import datetime
 import json
-import pika
+
 from django.contrib import messages
 from django.contrib.auth import get_user_model
-import requests
 from django.shortcuts import render, redirect
 from django.views.decorators.csrf import csrf_exempt
 from icecream import ic
 
-from accounts.models import Subscription, Empl_requisites
+from accounts.models import Subscription
 from natification_service.settings import (
     EMAIL_HOST_USER
 )
 from .forms import NTF_typeForm
-from .models import Service, Channel, Notification_group, Notification, NTF_type_for_channel
+from .models import Service, Channel, Notification_group, Notification
 
 
 def home_view(request):
@@ -40,7 +38,6 @@ ADMIN_USER = EMAIL_HOST_USER
 def receive(request):
     if request.method == "POST":
         data = json.loads(request.body.decode())
-
         ntf_group = Notification_group.objects.get(id=data["notification_group"])
         ntf = Notification.objects.create()
         ntf.title = data["title"]
@@ -51,7 +48,7 @@ def receive(request):
         ntf.ntf_group = ntf_group
         # for item in data["recipient"]:
         ntf.recipient = data["recipient"]
-        # ntf.save()
+        ntf.save()
         ic('Данные сохранены.')
         messages.success(request, 'Данные сохранены.')
         return redirect('/')
@@ -67,8 +64,7 @@ def ntf_templates_view(request):
         data = form.cleaned_data
         for item in data['ntf_group']:
             new_ntf_templates.ntf_group.add(Notification_group.objects.get(group_name=item))
-        for item in data['channel']:
-            new_ntf_templates.channel.add(Channel.objects.get(name=item))
+        new_ntf_templates.channel = (Channel.objects.get(name=data['channel']))
         new_ntf_templates.templates_for_massage = data['templates_for_massage']
         new_ntf_templates.save()
         messages.success(request, 'Данные сохранены')
