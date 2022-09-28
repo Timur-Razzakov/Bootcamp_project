@@ -1,5 +1,5 @@
 import schedule
-import datetime
+from datetime import datetime
 import os, sys
 
 from django.contrib.auth import get_user_model
@@ -31,7 +31,6 @@ def handle():
     channel = Channel.objects.get(name='Email')
     # Обращаемся в таблицу за новыми results по коду статус и по каналу связи
     results = Result.objects.filter(channels=channel).exclude(sending_status='1')
-    print('Данные не найдены...')
     # Тут перебираем каждую строку result и отправляем по отдельности
     for result in results:
         employee_details = result.employee_details.all()  # Из results извлекаем реквизиты
@@ -56,12 +55,12 @@ def handle():
         # Проверка отправки
         if res:  # Если отправится изменяем статус на 1
             result.sending_status = '1'
-            result.process_date = datetime.date.today()
+            result.process_date = str(datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
             result.save()
             print("Sended")
         else:  # Если не отправится изменяем статус на 2
             result.sending_status = '2'
-            result.process_date = datetime.date.today()
+            result.process_date = str(datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
             result.save()
             print("Not sended")
 

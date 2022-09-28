@@ -76,9 +76,10 @@ def ntf_templates_view(request):
 def subscribe(request, pk):
     try:
         user = User.objects.get(email=request.user)
-        ic(user)
         subscripton = Subscription.objects.get(employee=user)
         notification_group = Notification_group.objects.get(id=pk)
+        user.notification_group.add(notification_group)
+        user.save()
         subscripton.notification_group.add(notification_group)
         subscripton.save()
     except:
@@ -91,6 +92,8 @@ def unsubscribe(request, pk):
         user = User.objects.get(email=request.user)
         subscripton = Subscription.objects.get(employee=user)
         notification_group = Notification_group.objects.get(id=pk)
+        user.notification_group.remove(notification_group)
+        user.save()
         subscripton.notification_group.remove(notification_group)
         subscripton.save()
     except:

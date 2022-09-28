@@ -34,17 +34,17 @@ class Notification(models.Model):
                                   blank=True, null=True)
     url = models.CharField(verbose_name='url', max_length=30, blank=True, null=True)
     message = models.TextField(verbose_name='Message', blank=True, null=True)
-    created_at = models.DateField(verbose_name=("created_at"), auto_now_add=True)
+    created_at = models.DateTimeField(verbose_name=("created_at"), auto_now_add=True)
     recipient = models.TextField(verbose_name="employee_recipient", null=True, blank=True)
+    processing_status = models.BooleanField(verbose_name="processing_status", default=False)
 
     def __str__(self):
         return self.title
 
 
 class NTF_type_for_channel(models.Model):
-    # ntf_group = models.ForeignKey(Notification_group,verbose_name='ntf_group', on_delete=models.CASCADE, null=True blank=True)
-    #
-    ntf_group = models.ManyToManyField(Notification_group, blank=True)
+    ntf_group = models.ForeignKey(Notification_group, verbose_name='ntf_group', on_delete=models.CASCADE, null=True, blank=True)
+    # ntf_group = models.ManyToManyField(Notification_group, blank=True)
     channel = models.ForeignKey(Channel, verbose_name='channel', on_delete=models.CASCADE, null=True,
                                 blank=True)
     templates_for_massage = models.TextField(verbose_name='templates_for_massage')

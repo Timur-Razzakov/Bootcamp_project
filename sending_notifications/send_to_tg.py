@@ -64,12 +64,12 @@ def sent_ntf():
         # Проверка отправки
         if reg:  # Если успешно, статус-1
             result.sending_status = '1'
-            result.process_date = datetime.date.today()
+            result.process_date = str(datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
             result.save()
             print("Sended")
         else:  # Если ошибка, статус-2
             result.sending_status = '2'
-            result.process_date = datetime.date.today()
+            result.process_date = str(datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
             result.save()
             print("Not sended")
 

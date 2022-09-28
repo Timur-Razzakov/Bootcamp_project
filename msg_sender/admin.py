@@ -54,10 +54,10 @@ class Notification_groupAdmin(admin.ModelAdmin):
 
 
 class NTF_type_for_channelAdmin(admin.ModelAdmin):
-    list_display = ('get_ntf_type', 'channel', 'templates_for_massage')
+    list_display = ('ntf_group', 'channel', 'templates_for_massage')
 
-    def get_ntf_type(self, obj):
-        return "\n".join([ntf.group_name for ntf in obj.ntf_group.all()])
+    # def get_ntf_type(self, obj):
+    #     return "\n".join([ntf.group_name for ntf in obj.ntf_group.all()])
 
 
 class ChannelAdmin(admin.ModelAdmin):

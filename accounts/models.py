@@ -36,8 +36,8 @@ class Result(models.Model):
 
     sending_status = models.CharField(verbose_name='sending_status', max_length=90, null=True,
                                       blank=True)  # --
-    process_date = models.DateField(verbose_name='sent_to', null=True, blank=True)
-    created_at = models.DateField(verbose_name="created_at", null=True, blank=True)
+    process_date = models.DateTimeField(verbose_name='sent_to', null=True, blank=True)
+    created_at = models.DateTimeField(verbose_name="created_at", null=True, blank=True)
     channels = models.ForeignKey(Channel, on_delete=models.SET_NULL, verbose_name='channels for send',
                                  null=True, blank=True)
     message = models.TextField(verbose_name="Message")
