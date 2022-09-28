@@ -8,8 +8,51 @@
     <div class="col-md-8 mx-auto">
         <h4 class="my-2">Настройки</h4>
         <form method="POST" action="">{% csrf_token %}
+            {% comment %}
             <div class="form-group">
                 {{ form.as_p }}
+            </div>
+            {% endcomment %}
+
+            <div class="form-group">
+                <p>
+                    <label for="id_email">Введите email:</label>
+                    <input type="email" name="email" value="{{ email }}" class="form-control" required="" id="id_email">
+                </p>
+                <p>
+                  <label for="id_notification_group">Выберите группу нотификации, от которой хотите получать уведомления:</label>
+                  <select name="notification_group" class="form-control" required="" id="id_notification_group" multiple="">
+                    {% for ntf in all_notification_groups %}
+                        {% if ntf in user_notification_groups %}
+                            <option value="{{ ntf }}" selected>{{ ntf.group_name }}</option>
+                        {% else %}
+                            <option value="{{ ntf }}">{{ ntf.group_name }}</option>
+                        {% endif %}
+                    {% endfor %}
+                  </select>
+                </p>
+                <p>
+                    <label for="id_current_password">Введите текущий пароль:</label>
+                    <input type="password" name="current_password" class="form-control" required="" id="id_current_password">
+                </p>
+                <p>
+                    <label for="id_password">Введите пароль:</label>
+                    <input type="password" name="password" class="form-control" required="" id="id_password">
+                <p>
+                    <label for="id_password2">Введите пароль ещё раз:</label>
+                    <input type="password" name="password2" class="form-control" required="" id="id_password2">
+                </p>
+                {% if receiver %}
+                <p>
+                    <label for="id_receiver">Хотите ли вы получать уведомления?</label>
+                    <input type="checkbox" name="receiver" id="id_receiver" checked="">
+                </p>
+                {% else %}
+                <p>
+                    <label for="id_receiver">Хотите ли вы получать уведомления?</label>
+                    <input type="checkbox" name="receiver" id="id_receiver">
+                </p>
+                {% endif %}
             </div>
             <button type="submit" class="btn btn-primary">Сохранить</button>
         </form>
@@ -20,29 +63,4 @@
 </div>
 
 
-<div class="row my-5">
-    <div class="col-md-8 mx-auto">
-        <p class="my-2">Если выши реквизиты были изменены или вы используете другие, то укажите их пожалуйста!!</p>
-        <p>
-            <button class="btn btn-success"
-                    type="button" data-toggle="collapse"
-                    data-target="#collapsed" aria-expanded="false"
-                    aria-controls="collapseExample">
-                Показать форму
-            </button>
-        </p>
-        <div class="collapse" id="collapsed">
-            <div class="card card-body">
-                <form method="POST" action="{% url 'requisites_update' %} ">{% csrf_token %}
-                    <div class="form-group">
-                        {{ requisites_form.as_p }}
-                    </div>
-                    <button type="submit" class="btn btn-primary">Отправить</button>
-                </form>
-            </div>
-        </div>
-
-
-    </div>
-</div>
 {% endblock %}

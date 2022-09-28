@@ -1,0 +1,41 @@
+{% extends "base.html" %}
+
+{% block title %} Requisite update {% endblock %}
+
+{% block content %}
+<div class="row ">
+    <div class="col-md-8 mx-auto">
+        <h4 class="my-2">Настройки реквизитов</h4>
+        <form method="POST" action="">{% csrf_token %}
+            <div class="form-group">
+                <p>
+                    {% comment %} <label for="id_employee">Employee:</label> {% endcomment %}
+                    <select name="employee" class="form-control" required="" hidden="True">
+                        <option value="{{ requisite.employee }}" selected="">{{ requisite }}</option>
+                    </select>
+                </p>
+                <p>
+                    <label for="id_channel">Выберите канал, для которого хотите ввести реквизиты:</label>
+                    <select name="channel" class="form-control" required="" id="id_channel">
+                        {% for channel in channels %}
+                        {% if channel == requisite.channel %}
+                        <option value="{{ channel }}" selected="">{{ channel }}</option>
+                        {% else %}
+                        <option value="{{ channel }}">{{ channel }}</option>
+                        {% endif %}
+                        {% endfor %}
+                    </select>
+                </p>
+                <p>
+                    <label for="id_user_details">Введите свои реквизиты, через запятую. Если вы хотите
+                        получать через телеграмм,то введите свой channelID, его можете найти с помощью
+                        "@username_to_id_bot" этого бота.Или введите ссылку канала, группы:</label>
+                    <input type="text" value="{{ requisite.user_details }}" name="user_details"
+                           class="form-control" required="" id="id_user_details">
+                </p>
+            </div>
+            <button type="submit" class="btn btn-primary">Сохранить</button>
+        </form>
+    </div>
+</div>
+{% endblock %}

@@ -121,11 +121,15 @@ def update_view(request):
                 data = form.cleaned_data
                 user.email = data['email']
                 user.notification_group.set(data['notification_group'])
+                subscription = Subscription.objects.get(employee=user)
+                subscription.notification_group.set(data['notification_group'])
+                subscription.save()
                 # for item in data['notification_group']:
                 #     user.notification_group.add(Notification_group.objects.get(group_name=item))
                 c_user = authenticate(email=data['email'], password=data['current_password'])
                 ic(c_user)
                 if c_user is not None:
+                    messages.error(request, 'Неверный пароль или Логин.')
                     ic('Неверный....')
                 else:
                     user.receiver = data['receiver']
@@ -133,11 +137,18 @@ def update_view(request):
                     user.save()
                 messages.success(request, 'Данные сохранены.')
                 return redirect('update')
-        form = UserUpdateForm(
-            initial={'email': user.email,
-                     'receiver': user.receiver})  # выводит уже введённые данные
-        return render(request, 'accounts/update.html',
-                      {'form': form, })
+            else:
+                print("Form not valid")
+        # form = UserUpdateForm(
+        #     initial={'email': user.email,
+        #              'receiver': user.receiver})  # выводит уже введённые данные
+        all_notification_groups = Notification_group.objects.all()
+        context = {'email': user.email,
+                   'receiver': user.receiver,
+                   'user_notification_groups': user.notification_group.all(),
+                   'all_notification_groups': all_notification_groups}
+
+        return render(request, 'accounts/update.html', context)
     else:
         return redirect('login')
 
@@ -145,29 +156,33 @@ def update_view(request):
 """Функция для обновления реквизитов пользователя"""
 
 
-def requisite_update_view(request):
-    if request.method == 'POST':
-        requisites_form = UserRequisitesForm(request.POST or None)
-        if requisites_form.is_valid():
-            data = requisites_form.cleaned_data
-            print(data)
+def requisite_list_view(request):
+    user = request.user
+    requisites = Empl_requisites.objects.filter(employee=user)
+    return render(request, "accounts/requisite_list.html", {'requisites': requisites})
 
-            # qs = Error.objects.filter(created_at=dt.date.today())
-            # if qs.exists():
-            #     err = qs.first()
-            #     data = err.data.get('user_data', [])
-            #     data.append({'city': city, 'email': email, 'speciality': speciality})
-            #     err.data['user_data'] = data
-            #     err.save()
-            # else:
-            #     data = [{'city': city, 'email': email, 'speciality': speciality}]
-            #     Error(data=f"user_data:{data}").save()
-            # messages.success(request, 'Данные отправлены администрации.')
-            # return redirect('update')
+
+def requisite_update_view(request, pk):
+    if request.method == 'POST':
+        requisite_update_form = UserRequisitesForm(request.POST)
+        ic(requisite_update_form)
+        if requisite_update_form.is_valid():
+            data = requisite_update_form.cleaned_data
+            ic(data)
+            requisite = Empl_requisites.objects.get(id=pk)
+            requisite.channel = Channel.objects.get(name=data['channel'])
+            requisite.user_details = data['user_details']
+            requisite.save()
+            return redirect('requisites_update', pk)
         else:
-            return redirect('update')
+            ic('jibasdfdsafsadfadsfdsaf')
+            messages.error(request, 'Данные не верны!!')
+            return redirect('requisites_update', pk)
     else:
-        return redirect('home')
+        requisite = Empl_requisites.objects.get(id=pk)
+        channels = Channel.objects.all()
+        context = {'requisite': requisite, 'channels': channels}
+        return render(request, 'accounts/requisite_update.html', context)
 
 
 """Функция для удаления пользователя"""
@@ -196,6 +211,7 @@ def save_to_result(request):
     global ntf_templates
     if request.method == "POST":
         data = json.loads(request.body.decode())
+        ic(data)
         ntf_group = Notification_group.objects.get(pk=data['notification_group'])
         channel_names = Channel.objects.all()
         for channel_name in channel_names:  # tg
@@ -205,7 +221,7 @@ def save_to_result(request):
             for requisite in all_requisites:
                 res_for_send.employee_details.add(requisite)
             templates = NTF_type_for_channel.objects.get(channel=channel_name,
-                                                         ntf_group=ntf_group)
+                                                        ntf_group=ntf_group)
             tm_message = Template(templates.templates_for_massage)
             msg = tm_message.render(message_title=data['title'],
                                     status=data['status'],

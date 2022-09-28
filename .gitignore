@@ -5,3 +5,4 @@
 *.pyc
 ../configurations
 templates_tag.txt
+old_update.html

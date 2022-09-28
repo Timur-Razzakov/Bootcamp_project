@@ -42,10 +42,12 @@ class Notification(models.Model):
 
 
 class NTF_type_for_channel(models.Model):
+    # ntf_group = models.ForeignKey(Notification_group,verbose_name='ntf_group', on_delete=models.CASCADE, null=True blank=True)
+    #
     ntf_group = models.ManyToManyField(Notification_group, blank=True)
     channel = models.ForeignKey(Channel, verbose_name='channel', on_delete=models.CASCADE, null=True,
                                 blank=True)
     templates_for_massage = models.TextField(verbose_name='templates_for_massage')
 
     def __str__(self):
-        return str(self.ntf_group)
+        return str(self.channel)
