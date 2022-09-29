@@ -8,7 +8,8 @@ from django.views.decorators.csrf import csrf_exempt
 from icecream import ic
 from jinja2 import Template
 
-from accounts.forms import UserLoginForm, UserRegistrationForm, UserRequisitesForm, UserUpdateForm
+from accounts.forms import UserLoginForm, UserRegistrationForm, UserRequisitesForm, UserUpdateForm, \
+    UserRequisitesUpdateForm
 from msg_sender.models import Channel, Notification_group, NTF_type_for_channel
 
 User = get_user_model()
@@ -89,10 +90,10 @@ def requisites_view(request):
         """ Функция для заполнения формы подписки   """
         subsc = Subscription.objects.create()
         user_data = User.objects.filter(email=request.user).values('id', 'notification_group')
-        ic(User.objects.get(email=request.user))
+        ic(user_data)
         for item in user_data:
             subsc.employee = User.objects.get(pk=item['id'])
-            subsc.notification_group.add(item['notification_group'])
+            subsc.notification_group.add(Notification_group.objects.get(pk=item['notification_group']))
             empl_requisites = Empl_requisites.objects.filter(employee=item['id']).values('id', 'channel',
                                                                                          )
             for item in empl_requisites:
@@ -162,7 +163,7 @@ def requisite_list_view(request):
 
 def requisite_update_view(request, pk):
     if request.method == 'POST':
-        requisite_update_form = UserRequisitesForm(request.POST)
+        requisite_update_form = UserRequisitesUpdateForm(request.POST)
         ic(requisite_update_form)
         if requisite_update_form.is_valid():
             data = requisite_update_form.cleaned_data
@@ -193,39 +194,3 @@ def delete_view(request):
             messages.error(request, 'Пользователь удалён :(')
     return redirect('home')
 
-
-"""
-
-Функция для сбора всех данных и отправка в сервисы для рассылки нотификаций
-
-"""
-
-
-# TODO: Сохранить нотификации в result ЭТО СТАРЫЙ МЕТОД 
-@csrf_exempt
-def save_to_result(request):
-    global ntf_templates
-    if request.method == "POST":
-        data = json.loads(request.body.decode())
-        ntf_group = Notification_group.objects.get(pk=data['notification_group'])
-        channel_names = Channel.objects.all()
-        for channel_name in channel_names:  # tg
-            res_for_send = Result.objects.create()
-            res_for_send.channels = channel_name
-            all_requisites = Empl_requisites.objects.filter(channel=channel_name)
-            for requisite in all_requisites:
-                res_for_send.employee_details.add(requisite)
-            templates = NTF_type_for_channel.objects.get(channel=channel_name,
-                                                        ntf_group=ntf_group)
-            tm_message = Template(templates.templates_for_massage)
-            msg = tm_message.render(message_title=data['title'],
-                                    status=data['status'],
-                                    message=data['message'],
-                                    created_at=data['created_at'],
-                                    url=data['url'])
-            res_for_send.message = msg
-            res_for_send.created_at = data['created_at']
-            res_for_send.save()
-
-        messages.success(request, 'Данные сохранены')
-        return redirect('/')

@@ -12,7 +12,7 @@ import django
 django.setup()
 
 # -------------------------------------------------------------------------------
-import datetime
+from datetime import datetime
 import os, sys
 
 import requests

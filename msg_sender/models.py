@@ -24,7 +24,7 @@ class Notification_group(models.Model):
     description = models.TextField(verbose_name='description_ntf_group', max_length=255)
 
     def __str__(self):
-        return str(self.pk)
+        return str(self.group_name)
 
 
 class Notification(models.Model):

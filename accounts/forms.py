@@ -4,6 +4,7 @@ from django import forms
 from django.contrib.auth import get_user_model, authenticate
 from django.contrib.auth.hashers import check_password
 from django.contrib.auth.models import User
+from icecream import ic
 
 from msg_sender.models import Channel, Notification_group
 from .models import Empl_requisites
@@ -100,7 +101,7 @@ class UserRequisitesForm(forms.ModelForm):
         if user_details:
             for item in user_details:
                 if channels.name == 'Email' and re.match(pattern, item) is not None \
-                        or channels.name.startswith('Telegram') and item.isdigit():
+                        or channels.name.startswith('Telegram') and item[1:].isdigit():
 
                     qs = Empl_requisites.objects.filter(user_details=item).exclude(
                         user_details__startswith='-')
@@ -117,31 +118,31 @@ class UserRequisitesForm(forms.ModelForm):
 """
 
 
-# class UserRequisitesUpdateForm(forms.Form):
-#     employee = forms.EmailField()
-#     channel = forms.CharField()
-#     user_details = forms.CharField()
-#
-#     """Проверяем есть ли реквизиты и производим проверку,
-#           на верность указанных данных, относительно канала"""
-#
-#     def clean(self, *args, **kwargs):
-#         pattern = r"^[-\w\.]+@([-\w]+\.)+[-\w]{2,4}$"
-#         channels = self.cleaned_data.get('channel')
-#         user_details = self.cleaned_data.get('user_details').split(',')
-#         if user_details:
-#             for item in user_details:
-#                 if channels.name == 'Email' and re.match(pattern, item) is not None \
-#                         or channels.name.startswith('Telegram') and item.isdigit():
-#
-#                     qs = Empl_requisites.objects.filter(user_details=item).exclude(
-#                         user_details__startswith='-')
-#                     if qs.exists():
-#                         raise forms.ValidationError('Реквизиты существуют')
-#                 else:
-#                     raise forms.ValidationError('Реквизиты не соответствуют  '
-#                                                 'указанному каналу!!')
-#             return super(UserRequisitesUpdateForm, self).clean(*args, **kwargs)
+class UserRequisitesUpdateForm(forms.Form):
+    employee = forms.EmailField()
+    channel = forms.CharField()
+    user_details = forms.CharField()
+
+    """Проверяем есть ли реквизиты и производим проверку,
+          на верность указанных данных, относительно канала"""
+
+    def clean(self, *args, **kwargs):
+        pattern = r"^[-\w\.]+@([-\w]+\.)+[-\w]{2,4}$"
+        channels = self.cleaned_data.get('channel')
+        user_details = self.cleaned_data.get('user_details').split(',')
+        if user_details:
+            for item in user_details:
+                if channels.name == 'Email' and re.match(pattern, item) is not None \
+                        or channels.name.startswith('Telegram') and item.isdigit():
+
+                    qs = Empl_requisites.objects.filter(user_details=item).exclude(
+                        user_details__startswith='-')
+                    if qs.exists():
+                        raise forms.ValidationError('Реквизиты существуют')
+                else:
+                    raise forms.ValidationError('Реквизиты не соответствуют  '
+                                                'указанному каналу!!')
+            return super(UserRequisitesUpdateForm, self).clean(*args, **kwargs)
 
 
 class UserUpdateForm(UserRegistrationForm):

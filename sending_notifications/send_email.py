@@ -1,5 +1,4 @@
 import schedule
-from datetime import datetime
 import os, sys
 
 from django.contrib.auth import get_user_model
@@ -15,7 +14,7 @@ django.setup()
 
 from django.core.mail import EmailMessage
 from msg_sender.models import Channel
-
+from datetime import datetime
 from accounts.models import Result
 from natification_service.settings import (
     EMAIL_HOST_USER
