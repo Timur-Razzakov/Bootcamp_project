@@ -46,10 +46,9 @@ def receive(request):
         ntf.message = data["message"]
         ntf.created_at = data["created_at"]
         ntf.ntf_group = ntf_group
-        # for item in data["recipient"]:
+        # for item in data["recipient"]
         ntf.recipient = data["recipient"]
         ntf.save()
-        ic('Данные сохранены.')
         messages.success(request, 'Данные сохранены.')
         return redirect('/')
 

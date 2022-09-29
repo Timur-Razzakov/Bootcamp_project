@@ -127,10 +127,8 @@ def update_view(request):
                 # for item in data['notification_group']:
                 #     user.notification_group.add(Notification_group.objects.get(group_name=item))
                 c_user = authenticate(email=data['email'], password=data['current_password'])
-                ic(c_user)
                 if c_user is not None:
                     messages.error(request, 'Неверный пароль или Логин.')
-                    ic('Неверный....')
                 else:
                     user.receiver = data['receiver']
                     user.set_password(form.cleaned_data['password'])  # ЗАШИФРОВЫВАЕТ пароль
@@ -168,14 +166,12 @@ def requisite_update_view(request, pk):
         ic(requisite_update_form)
         if requisite_update_form.is_valid():
             data = requisite_update_form.cleaned_data
-            ic(data)
             requisite = Empl_requisites.objects.get(id=pk)
             requisite.channel = Channel.objects.get(name=data['channel'])
             requisite.user_details = data['user_details']
             requisite.save()
             return redirect('requisites_update', pk)
         else:
-            ic('jibasdfdsafsadfadsfdsaf')
             messages.error(request, 'Данные не верны!!')
             return redirect('requisites_update', pk)
     else:
@@ -205,13 +201,12 @@ def delete_view(request):
 """
 
 
-# TODO: Сохранить нотификации в result
+# TODO: Сохранить нотификации в result ЭТО СТАРЫЙ МЕТОД 
 @csrf_exempt
 def save_to_result(request):
     global ntf_templates
     if request.method == "POST":
         data = json.loads(request.body.decode())
-        ic(data)
         ntf_group = Notification_group.objects.get(pk=data['notification_group'])
         channel_names = Channel.objects.all()
         for channel_name in channel_names:  # tg

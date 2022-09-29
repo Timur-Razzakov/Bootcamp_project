@@ -20,13 +20,12 @@ def handle():
     for notification in notifications:
         ntf_group = notification.ntf_group
 
+        #Получаем подписанные пользователи
         subscriptions = Subscription.objects.filter(notification_group=ntf_group)
         recipient = []
         for subscription in subscriptions:
             recipient.append(subscription.employee)
 
-        print(recipient)
-        print(notification.message)
         channel_names = Channel.objects.all()
         for channel_name in channel_names:  # tg
             res_for_send = Result.objects.create()
