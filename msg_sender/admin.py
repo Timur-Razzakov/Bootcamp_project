@@ -28,8 +28,8 @@ class NotificationForm(forms.ModelForm):
 
 class NotificationAdmin(admin.ModelAdmin):
     # form = NotificationForm
-    list_display = ('id', 'title', 'status', 'ntf_group',
-                    'url', 'message', 'created_at')
+    list_display = ('id','created_at', 'title', 'status', 'ntf_group',
+                    'url', 'message')
 
 
 class Notification_groupForm(forms.ModelForm):

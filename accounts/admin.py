@@ -82,9 +82,20 @@ class UserAdmin(BaseUserAdmin):
     filter_horizontal = ()
 
 
+class ResultAdmin(admin.ModelAdmin):
+    # form = NotificationForm
+    list_display = ('notification', 'id', 'sending_status', 'created_at', 'channels',
+                    'message')
+
+
+class Empl_requisitesAdmin(admin.ModelAdmin):
+    # form = NotificationForm
+    list_display = ('id', 'user_details', 'employee', 'channel')
+
+
 admin.site.register(MyUser, UserAdmin)
-admin.site.register(Empl_requisites)
+admin.site.register(Empl_requisites, Empl_requisitesAdmin)
 admin.site.register(Subscription)
-admin.site.register(Result)
+admin.site.register(Result, ResultAdmin)
 """ отмена регистрацию модели группы от администратора"""
 admin.site.unregister(Group)

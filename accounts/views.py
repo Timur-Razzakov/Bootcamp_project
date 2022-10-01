@@ -1,8 +1,8 @@
 from django.contrib import messages
 from django.contrib.auth import authenticate, login, logout, get_user_model
 from django.contrib.auth.decorators import login_required
+from django.core.exceptions import ObjectDoesNotExist
 from django.shortcuts import render, redirect
-from icecream import ic
 
 from accounts.forms import UserLoginForm, UserRegistrationForm, UserRequisitesForm, UserUpdateForm, \
     UserRequisitesUpdateForm
@@ -70,11 +70,12 @@ def requisites_view(request):
         data = form.cleaned_data
         user_requisites = form.save(commit=False)
         user_details = data['user_details'].split(',')
-        email = User.objects.get(email=data['employee'])
+        email = User.objects.get(email=user)
         emp_email.append(email)
         channel = Channel.objects.get(name=data['channel'])
         emp_channel.append(channel)
         user_requisites.user_details = user_details[0]
+        user_requisites.employee = email
         user_requisites.save()
         for item in user_details[1::]:
             requis = Empl_requisites.objects.create()
@@ -83,18 +84,20 @@ def requisites_view(request):
             requis.user_details = item
             requis.save()
         """ Функция для заполнения формы подписки   """
-        subsc = Subscription.objects.create()
-        user_data = User.objects.filter(email=request.user).values('id', 'notification_group')
-        ic(user_data)
-        for item in user_data:
-            subsc.employee = User.objects.get(pk=item['id'])
-            subsc.notification_group.add(Notification_group.objects.get(pk=item['notification_group']))
-            empl_requisites = Empl_requisites.objects.filter(employee=item['id']).values('id', 'channel',
-                                                                                         )
-            for item in empl_requisites:
-                # subsc.employee_requisites.add(item['id'])
-                subsc.channels.add(Channel.objects.get(pk=item['channel']))
-        subsc.save()
+        try:
+            Subscription.objects.get(employee=request.user)
+        except ObjectDoesNotExist:
+            subsc = Subscription.objects.create()
+            user_data = User.objects.filter(email=request.user).values('id', 'notification_group')
+            for item in user_data:
+                subsc.employee = User.objects.get(pk=item['id'])
+                subsc.notification_group.add(Notification_group.objects.get(pk=item['notification_group']))
+                empl_requisites = Empl_requisites.objects.filter(employee=item['id']).values('id', 'channel',
+                                                                                             )
+                for item in empl_requisites:
+                    # subsc.employee_requisites.add(item['id'])
+                    subsc.channels.add(Channel.objects.get(pk=item['channel']))
+            subsc.save()
         form = UserRegistrationForm(
             initial={'email': user.email,
                      'notification_group': user.notification_group})  # выводит уже введённые данные
@@ -159,7 +162,6 @@ def requisite_list_view(request):
 def requisite_update_view(request, pk):
     if request.method == 'POST':
         requisite_update_form = UserRequisitesUpdateForm(request.POST)
-        ic(requisite_update_form)
         if requisite_update_form.is_valid():
             data = requisite_update_form.cleaned_data
             requisite = Empl_requisites.objects.get(id=pk)

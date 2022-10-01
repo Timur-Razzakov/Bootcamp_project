@@ -34,7 +34,7 @@ class Notification(models.Model):
                                   blank=True, null=True)
     url = models.CharField(verbose_name='url', max_length=30, blank=True, null=True)
     message = models.JSONField(verbose_name='Message', blank=True, null=True)
-    created_at = models.DateTimeField(verbose_name=("created_at"), auto_now_add=True)
+    created_at = models.DateTimeField(verbose_name="created_at", auto_now_add=True)
     recipient = models.TextField(verbose_name="employee_recipient", null=True, blank=True)
     processing_status = models.BooleanField(verbose_name="processing_status", default=False)
 

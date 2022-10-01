@@ -73,14 +73,15 @@ def ntf_templates_view(request):
 
 
 def subscribe(request, pk):
+    global subscription
     try:
         user = User.objects.get(email=request.user)
-        subscripton = Subscription.objects.get(employee=user)
+        subscription = Subscription.objects.get(employee=user)
         notification_group = Notification_group.objects.get(id=pk)
         user.notification_group.add(notification_group)
         user.save()
-        subscripton.notification_group.add(notification_group)
-        subscripton.save()
+        subscription.notification_group.add(notification_group)
+        subscription.save()
     except:
         print("Wrong")
     return redirect('/')

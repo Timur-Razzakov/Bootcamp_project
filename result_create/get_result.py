@@ -1,8 +1,7 @@
+import os
+import sys
 
 from jinja2 import Template
-import os, sys
-
-from django.contrib.auth import get_user_model
 
 proj = os.path.dirname(os.path.abspath('../manage.py'))
 sys.path.append(proj)
@@ -11,9 +10,10 @@ import django
 
 django.setup()
 # -----------------------------------------------------------------------------------------------
-from accounts.models import Result, Empl_requisites, Subscription
+from accounts.models import Result, Empl_requisites, Subscription, MyUser
 from msg_sender.models import Notification, Channel, NTF_type_for_channel
 import schedule
+
 
 def get_data():
     notifications = Notification.objects.filter(processing_status=False)
@@ -24,13 +24,14 @@ def get_data():
     for notification in notifications:
         ntf_group = notification.ntf_group
 
-        # Получаем подписанные пользователи
-        subscriptions = Subscription.objects.filter(notification_group=ntf_group)
+        # Получаем подписанных пользователей
+        subscriptions = Subscription.objects.filter(notification_group=ntf_group).values('channels',
+                                                                                         'employee')
+        channel_names = set()
         recipient = []
-        for subscription in subscriptions:
-            recipient.append(subscription.employee)
-
-        channel_names = Channel.objects.all()
+        for item in subscriptions:
+            channel_names.add(Channel.objects.get(pk=item['channels']))
+            recipient.append(MyUser.objects.get(pk=item['employee']))
         for channel_name in channel_names:  # tg
             res_for_send = Result.objects.create()
             res_for_send.channels = channel_name
@@ -39,7 +40,6 @@ def get_data():
             for requisite in all_requisites:
                 if requisite.employee in recipient:
                     res_for_send.employee_details.add(requisite)
-
             templates = NTF_type_for_channel.objects.get(channel=channel_name,
                                                          ntf_group=ntf_group)
             tm_message = Template(templates.templates_for_massage)
@@ -57,7 +57,7 @@ def get_data():
 
 
 def main():
-    # Это планировшик, он каждый n секунд(seconds)/минут(minutes) сможет запускать код
+    # Это планировщик, он каждый n секунд(seconds)/минут(minutes) сможет запускать код
     schedule.every(5).seconds.do(get_data)
 
     while True:

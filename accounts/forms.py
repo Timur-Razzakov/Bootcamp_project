@@ -69,11 +69,6 @@ class UserRegistrationForm(forms.ModelForm):
 
 
 class UserRequisitesForm(forms.ModelForm):
-    employee = forms.ModelChoiceField(
-        queryset=User.objects.all(),
-        required=True,
-        widget=forms.Select(attrs={'class': 'form-control'})
-    )
     channel = forms.ModelChoiceField(
         queryset=Channel.objects.all(),
         to_field_name="name",
@@ -89,7 +84,7 @@ class UserRequisitesForm(forms.ModelForm):
 
     class Meta:
         model = Empl_requisites
-        fields = ('employee', 'channel', 'user_details')  # 'employee',
+        fields = ('channel', 'user_details')  # 'employee',
 
     """Проверяем есть ли реквизиты и производим проверку,
         на верность указанных данных, относительно канала"""
@@ -100,9 +95,8 @@ class UserRequisitesForm(forms.ModelForm):
         user_details = self.cleaned_data.get('user_details').split(',')
         if user_details:
             for item in user_details:
-                if channels.name == 'Email' and re.match(pattern, item) is not None \
+                if channels.name == 'Email' and re.match(pattern, item.strip()) is not None \
                         or channels.name.startswith('Telegram') and item[1:].isdigit():
-
                     qs = Empl_requisites.objects.filter(user_details=item).exclude(
                         user_details__startswith='-')
                     if qs.exists():
@@ -132,6 +126,7 @@ class UserRequisitesUpdateForm(forms.Form):
         user_details = self.cleaned_data.get('user_details').split(',')
         if user_details:
             for item in user_details:
+                ic(item)
                 if channels.name == 'Email' and re.match(pattern, item) is not None \
                         or channels.name.startswith('Telegram') and item.isdigit():
 
@@ -140,6 +135,7 @@ class UserRequisitesUpdateForm(forms.Form):
                     if qs.exists():
                         raise forms.ValidationError('Реквизиты существуют')
                 else:
+                    ic(item)
                     raise forms.ValidationError('Реквизиты не соответствуют  '
                                                 'указанному каналу!!')
             return super(UserRequisitesUpdateForm, self).clean(*args, **kwargs)

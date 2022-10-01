@@ -37,9 +37,12 @@
                         <ul class="dropdown-menu">
                             <li><a class="dropdown-item" href="{% url 'update' %}">Настройки пользователя</a>
                             </li>
-                            <li><a class="dropdown-item" href="{% url 'requisite_list_view' %}">Мои реквизиты</a></li>
+                            <li><a class="dropdown-item" href="{% url 'requisite_list_view' %}">Мои
+                                реквизиты</a></li>
+                            {% if user.is_admin %}
                             <li><a class="dropdown-item" href="{% url 'add_ntf_templates' %}">Добавить свой
                                 шаблон нотификаций</a></li>
+                            {% endif %}
                         </ul>
                     </li>
                     {% else %}
