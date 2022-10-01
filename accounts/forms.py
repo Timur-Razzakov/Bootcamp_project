@@ -160,17 +160,3 @@ class UserUpdateForm(UserRegistrationForm):
         if data['password'] != data['password2']:
             raise forms.ValidationError('Пароли не совпадают!')
         return data['password2']
-
-# class RequisitesForm(forms.Form):
-#     tg_nickname = forms.CharField(
-#         required=True, widget=forms.TextInput(attrs={'class': 'form-control'}),
-#         label='Город'
-#     )
-#     tg_channel = forms.CharField(
-#         required=True, widget=forms.TextInput(attrs={'class': 'form-control'}),
-#         label='Специальность'
-#     )
-#     tg_channel = forms.EmailField(
-#         label='Введите email', required=True, widget=forms.EmailInput(
-#             attrs={'class': 'form-control'})
-#     )

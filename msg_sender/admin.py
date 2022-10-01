@@ -45,13 +45,6 @@ class Notification_groupAdmin(admin.ModelAdmin):
     list_display = ('id', 'service_name', 'group_name', 'description')
 
 
-# class NTF_type_for_channelForm(forms.ModelForm):
-#     templates_for_massage = forms.CharField(widget=CKEditorUploadingWidget())
-
-# class Meta:
-#     model = NTF_type_for_channel
-#     fields = '__all__'
-
 
 class NTF_type_for_channelAdmin(admin.ModelAdmin):
     list_display = ('ntf_group', 'channel', 'templates_for_massage')

@@ -1,19 +1,15 @@
-import json
-
 from django.contrib import messages
 from django.contrib.auth import authenticate, login, logout, get_user_model
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import render, redirect
-from django.views.decorators.csrf import csrf_exempt
 from icecream import ic
-from jinja2 import Template
 
 from accounts.forms import UserLoginForm, UserRegistrationForm, UserRequisitesForm, UserUpdateForm, \
     UserRequisitesUpdateForm
-from msg_sender.models import Channel, Notification_group, NTF_type_for_channel
+from msg_sender.models import Channel, Notification_group
 
 User = get_user_model()
-from .models import Empl_requisites, Subscription, Result
+from .models import Empl_requisites, Subscription
 
 """Функция для авторизации"""
 
@@ -68,7 +64,6 @@ def register_view(request):
 def requisites_view(request):
     form = UserRequisitesForm(request.POST or None)
     user = request.user
-    ic(user)
     emp_email = []
     emp_channel = []
     if form.is_valid():
@@ -193,4 +188,3 @@ def delete_view(request):
             qs.delete()
             messages.error(request, 'Пользователь удалён :(')
     return redirect('home')
-
