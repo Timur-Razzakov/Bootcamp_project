@@ -10,7 +10,9 @@
                 <h4 class="my-2 text-center">Форма для создания шаблонов для нотификаций</h4>
                 <form method="POST" action="">{% csrf_token %}
                     <div class="form-group">
+                        {% autoescape off %}
                         {{ form.as_p }}
+                        {% endautoescape %}
                     </div>
                     <button type="submit" class="btn btn-primary">Сохранить</button>
                 </form>

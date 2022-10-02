@@ -45,7 +45,7 @@ def sent_ntf():
     # Обращаемся в таблицу за новыми results по коду статус и по каналу связи
     results = Result.objects.filter(channels=channel).exclude(sending_status='1')
     for result in results:
-        ic(result)
+        ic(result.message)
         employee_details = result.employee_details.all()  # Из results извлекаем реквизиты
         ic(employee_details)
         for detail in employee_details:

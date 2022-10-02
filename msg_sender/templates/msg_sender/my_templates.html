@@ -1,13 +1,35 @@
 {% extends "base.html" %}
-{% block title %} NTF_templates {% endblock %}
+
+{% block title %} Templates {% endblock %}
 
 {% block content %}
-<main role="main">
-    <section class="jumbotron text-center">
-        <div class="container">
-            <h1>Здесь вы сможете посмотреть все свои шаблоны...</h1>
-            <p class="lead text-muted"> </p>
+<div class="row ">
+    <div class="col-md-8 mx-auto">
+        <h4 class="my-2">Настройки Шаблонов</h4>
+        <table class="table">
+            <thead>
+            <tr>
+                <th scope="col">Notification_group</th>
+                <th scope="col">Templates</th>
+                <th scope="col">Channel</th>
+            </tr>
+            </thead>
+            <tbody>
+            {% for template in templates %}
+            <tr>
+                <th scope="row"><a href="{% url 'template_update' template.id %}">{{ template.ntf_group}}
+                </a></th>
+                <td>
+                    {{ template }}
 
-        </div>
-    </section>
-{% endblock %}
+                </td>
+                <td>{{ template.channel }}</td>
+            </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+
+{% endblock content %}

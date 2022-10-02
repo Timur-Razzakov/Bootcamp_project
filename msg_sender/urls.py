@@ -7,6 +7,7 @@ urlpatterns = [
     path('receive/', receive, name='show'),
     path('subscribe/<int:pk>/', subscribe, name='subscribe'),
     path('unsubscribe/<int:pk>/', unsubscribe, name='unsubscribe'),
-    path('add_ntf_templates/', ntf_templates_view, name='add_ntf_templates')
+    path('my_templates/', ntf_templates_view, name='my_templates'),
+    path('template_update/<int:pk>/', template_update_view, name='template_update'),
 
 ]

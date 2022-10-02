@@ -1,4 +1,3 @@
-from ckeditor.widgets import CKEditorWidget
 from django import forms
 
 from .models import Notification, Notification_group, NTF_type_for_channel, Channel
@@ -21,13 +20,12 @@ class NotificationForm(forms.Form):
 
 
 class NTF_typeForm(forms.ModelForm):
-    ntf_group = forms.ModelMultipleChoiceField(
+    ntf_group = forms.ModelChoiceField(
         label='Выберите группу нотификации, для который хотите добавить шаблон',
         queryset=Notification_group.objects.all(),
         required=True,
-        widget=forms.SelectMultiple(attrs={'class': 'form-control'})
+        widget=forms.Select(attrs={'class': 'form-control'})
     )
-
     channel = forms.ModelChoiceField(
         queryset=Channel.objects.all(),
         to_field_name="name",
@@ -36,7 +34,8 @@ class NTF_typeForm(forms.ModelForm):
         label='Выберите канал,для которого хотите добавить шаблон'
     )
     templates_for_massage = forms.CharField(
-        widget=CKEditorWidget(attrs={'class': 'form-control'}),
+        widget=forms.Textarea(attrs={'class': 'form-control'}),
+        # widget=CKEditorWidget(attrs={'class': 'form-control'}),
         label='Ваш шаблон'
     )
 

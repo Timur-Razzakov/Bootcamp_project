@@ -4,14 +4,13 @@ from django.contrib import messages
 from django.contrib.auth import get_user_model
 from django.shortcuts import render, redirect
 from django.views.decorators.csrf import csrf_exempt
-from icecream import ic
 
 from accounts.models import Subscription
 from natification_service.settings import (
     EMAIL_HOST_USER
 )
 from .forms import NTF_typeForm
-from .models import Service, Channel, Notification_group, Notification
+from .models import Service, Notification_group, Notification, NTF_type_for_channel
 
 
 def home_view(request):
@@ -20,12 +19,12 @@ def home_view(request):
     try:
         user = User.objects.get(email=request.user)
         subscripton = Subscription.objects.get(employee=user)
-        context = {'services': services, 'notification_groups': notification_groups, 'subscripton': subscripton}
+        context = {'services': services, 'notification_groups': notification_groups,
+                   'subscripton': subscripton}
     except:
         context = {'services': services, 'notification_groups': notification_groups}
 
     return render(request, 'msg_sender/home.html', context)
-
 
 
 """ Получаем данные из внешнего сервиса и сохраняем в бд"""
@@ -46,7 +45,6 @@ def receive(request):
         ntf.message = data["message"]
         ntf.created_at = data["created_at"]
         ntf.ntf_group = ntf_group
-        # for item in data["recipient"]
         ntf.recipient = data["recipient"]
         ntf.save()
         messages.success(request, 'Данные сохранены.')
@@ -57,19 +55,28 @@ def receive(request):
 
 
 def ntf_templates_view(request):
-    form = NTF_typeForm(request.POST or None)
-    if form.is_valid():
-        new_ntf_templates = form.save()
-        data = form.cleaned_data
-        for item in data['ntf_group']:
-            new_ntf_templates.ntf_group.add(Notification_group.objects.get(group_name=item))
-        new_ntf_templates.channel = (Channel.objects.get(name=data['channel']))
-        new_ntf_templates.templates_for_massage = data['templates_for_massage']
-        new_ntf_templates.save()
-        messages.success(request, 'Данные сохранены')
-        return render(request, 'msg_sender/my_templates.html',
-                      {'new_ntf_templates': new_ntf_templates})  # 'accounts/login.html'
-    return render(request, 'msg_sender/add_ntf_templates.html', {'form': form})
+    templates = NTF_type_for_channel.objects.all()
+    return render(request, "msg_sender/my_templates.html", {'templates': templates})
+
+
+def template_update_view(request, pk):
+    template = NTF_type_for_channel.objects.get(pk=pk)
+    if request.method == "POST":
+        form = NTF_typeForm(request.POST)
+        if form.is_valid():
+            data = form.cleaned_data
+            template.ntf_group = data['ntf_group']
+            template.channel = data['channel']
+            template.templates_for_massage = data['templates_for_massage']
+            template.save()
+            messages.success(request, 'Данные изменены!!')
+            return redirect('my_templates')
+    form = NTF_typeForm(
+        initial={'templates_for_massage': template.templates_for_massage,
+                 'channel': template.channel,
+                 'ntf_group': template.ntf_group})
+    return render(request, "msg_sender/template_update.html",
+                  {'form': form})
 
 
 def subscribe(request, pk):

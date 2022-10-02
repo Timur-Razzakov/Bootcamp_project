@@ -4,8 +4,7 @@ from django.contrib.auth.decorators import login_required
 from django.core.exceptions import ObjectDoesNotExist
 from django.shortcuts import render, redirect
 
-from accounts.forms import UserLoginForm, UserRegistrationForm, UserRequisitesForm, UserUpdateForm, \
-    UserRequisitesUpdateForm
+from accounts.forms import UserLoginForm, UserRegistrationForm, UserRequisitesForm, UserUpdateForm
 from msg_sender.models import Channel, Notification_group
 
 User = get_user_model()
@@ -123,8 +122,7 @@ def update_view(request):
                 subscription = Subscription.objects.get(employee=user)
                 subscription.notification_group.set(data['notification_group'])
                 subscription.save()
-                # for item in data['notification_group']:
-                #     user.notification_group.add(Notification_group.objects.get(group_name=item))
+
                 c_user = authenticate(email=data['email'], password=data['current_password'])
                 if c_user is not None:
                     messages.error(request, 'Неверный пароль или Логин.')
@@ -132,13 +130,14 @@ def update_view(request):
                     user.receiver = data['receiver']
                     user.set_password(form.cleaned_data['password'])  # ЗАШИФРОВЫВАЕТ пароль
                     user.save()
-                messages.success(request, 'Данные сохранены.')
+
                 return redirect('update')
             else:
-                print("Form not valid")
+                messages.error(request, 'Данные не верны!!')
         # form = UserUpdateForm(
         #     initial={'email': user.email,
-        #              'receiver': user.receiver})  # выводит уже введённые данные
+        #              'receiver': user.receiver,
+        #              'notification_group': user.notification_group})  # выводит уже введённые данные
         all_notification_groups = Notification_group.objects.all()
         context = {'email': user.email,
                    'receiver': user.receiver,
@@ -160,23 +159,21 @@ def requisite_list_view(request):
 
 
 def requisite_update_view(request, pk):
+    requisite = Empl_requisites.objects.get(id=pk)
     if request.method == 'POST':
-        requisite_update_form = UserRequisitesUpdateForm(request.POST)
+        requisite_update_form = UserRequisitesForm(request.POST)
         if requisite_update_form.is_valid():
             data = requisite_update_form.cleaned_data
-            requisite = Empl_requisites.objects.get(id=pk)
-            requisite.channel = Channel.objects.get(name=data['channel'])
+            requisite.channel = data['channel']
             requisite.user_details = data['user_details']
             requisite.save()
-            return redirect('requisites_update', pk)
-        else:
-            messages.error(request, 'Данные не верны!!')
-            return redirect('requisites_update', pk)
-    else:
-        requisite = Empl_requisites.objects.get(id=pk)
-        channels = Channel.objects.all()
-        context = {'requisite': requisite, 'channels': channels}
-        return render(request, 'accounts/requisite_update.html', context)
+            messages.success(request, 'Данные изменены!!')
+            return redirect('requisite_list')
+    form = UserRequisitesForm(
+        initial={
+            'channel': requisite.channel,
+            'user_details': requisite.user_details})
+    return render(request, 'accounts/requisite_update.html', {'form': form})
 
 
 """Функция для удаления пользователя"""

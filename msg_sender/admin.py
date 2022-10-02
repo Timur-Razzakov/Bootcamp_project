@@ -28,7 +28,7 @@ class NotificationForm(forms.ModelForm):
 
 class NotificationAdmin(admin.ModelAdmin):
     # form = NotificationForm
-    list_display = ('id','created_at', 'title', 'status', 'ntf_group',
+    list_display = ('id', 'created_at', 'title', 'status', 'ntf_group',
                     'url', 'message')
 
 
@@ -45,8 +45,16 @@ class Notification_groupAdmin(admin.ModelAdmin):
     list_display = ('id', 'service_name', 'group_name', 'description')
 
 
+class NTF_type_for_channelForm(forms.ModelForm):
+    templates_for_massage = forms.CharField(widget=CKEditorUploadingWidget())
+
+    class Meta:
+        model = NTF_type_for_channel
+        fields = '__all__'
+
 
 class NTF_type_for_channelAdmin(admin.ModelAdmin):
+    # form = NTF_type_for_channelForm
     list_display = ('ntf_group', 'channel', 'templates_for_massage')
 
     # def get_ntf_type(self, obj):
