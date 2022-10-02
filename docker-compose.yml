@@ -5,7 +5,7 @@ services:
     build: .
     env_file:
       - .env
-    command: bash -c "python manage.py migrate && python manage.py loaddata dumped_data.json && python manage.py runserver 0.0.0.0:8800"
+    command: bash -c "python manage.py migrate  && python manage.py runserver 0.0.0.0:8800"
     volumes:
       - .:/app
     ports:
