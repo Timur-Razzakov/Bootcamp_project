@@ -1,9 +1,6 @@
 import os
 import sys
 
-import schedule
-from icecream import ic
-
 proj = os.path.dirname(os.path.abspath('../manage.py'))
 sys.path.append(proj)
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "natification_service.settings")
@@ -11,21 +8,14 @@ import django
 
 django.setup()
 
-# -------------------------------------------------------------------------------
-from datetime import datetime
-import os, sys
-
-import requests
-
-proj = os.path.dirname(os.path.abspath('../manage.py'))
-sys.path.append(proj)
-os.environ.setdefault("DJANGO_SETTINGS_MODULE", "natification_service.settings")
-import django
-
-django.setup()
 # -------------------------------------------------------------------------------
 import logging
+import schedule
+from datetime import datetime
+
+import requests
 from aiogram import Bot, Dispatcher
+
 from accounts.models import Result
 from msg_sender.models import Channel
 
@@ -45,9 +35,7 @@ def sent_ntf():
     # Обращаемся в таблицу за новыми results по коду статус и по каналу связи
     results = Result.objects.filter(channels=channel).exclude(sending_status='1')
     for result in results:
-        ic(result.message)
         employee_details = result.employee_details.all()  # Из results извлекаем реквизиты
-        ic(employee_details)
         for detail in employee_details:
             params = {
                 "chat_id": detail,
@@ -57,7 +45,6 @@ def sent_ntf():
             url_req = "https://api.telegram.org/bot" \
                       + token + "/sendMessage"
             reg = requests.get(url_req, params=params)
-            ic(reg)
         # Проверка отправки
         if reg:  # Если успешно, статус-1
             result.sending_status = '1'

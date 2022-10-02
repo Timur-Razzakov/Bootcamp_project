@@ -18,7 +18,7 @@ import schedule
 def get_data():
     notifications = Notification.objects.filter(processing_status=False)
     if notifications.exists():
-        print('работаем...')
+        print('Работаем...')
     else:
         print('Нет нужных данных')
     for notification in notifications:
@@ -53,7 +53,6 @@ def get_data():
             res_for_send.save()
             notification.processing_status = True
             notification.save()
-            print("Данные сохранены")
 
 
 def main():
