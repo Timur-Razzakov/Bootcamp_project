@@ -1,5 +1,5 @@
 # Nexign_bootcamp_project
-## Описание проекта
+## Notification_service
 
 Сервис по Рассылке нотификаций для стажировки в Nexign
 
