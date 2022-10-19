@@ -64,6 +64,7 @@ def requisites_view(request):
     form = UserRequisitesForm(request.POST or None)
     user = request.user
     emp_email = []
+    emp_email = []
     emp_channel = []
     if form.is_valid():
         data = form.cleaned_data
@@ -149,13 +150,16 @@ def update_view(request):
         return redirect('login')
 
 
-"""Функция для обновления реквизитов пользователя"""
+"""Функция для вывода всех реквизитов пользователя"""
 
 
 def requisite_list_view(request):
     user = request.user
-    requisites = Empl_requisites.objects.filter(employee=user)
+    requisites = Empl_requisites.objects.filter(employee=user.id)
     return render(request, "accounts/requisite_list.html", {'requisites': requisites})
+
+
+"""Функция для обновления реквизитов пользователя"""
 
 
 def requisite_update_view(request, pk):
@@ -187,3 +191,7 @@ def delete_view(request):
             qs.delete()
             messages.error(request, 'Пользователь удалён :(')
     return redirect('home')
+
+
+
+

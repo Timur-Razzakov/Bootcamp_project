@@ -14,7 +14,8 @@ class Empl_requisites(models.Model):
     def __str__(self):
         return str(self.user_details)
 
-
+        # def __str__(self):
+        #     return '%s, %s' % (self.last_name, self.first_name)
 class Subscription(models.Model):
     employee = models.ForeignKey('MyUser', verbose_name='employee', on_delete=models.CASCADE,
                                  null=True, blank=True)

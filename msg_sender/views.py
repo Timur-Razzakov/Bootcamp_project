@@ -27,29 +27,9 @@ def home_view(request):
     return render(request, 'msg_sender/home.html', context)
 
 
-""" Получаем данные из внешнего сервиса и сохраняем в бд"""
 # # Возвращает пользователя по умолчанию
 User = get_user_model()
 ADMIN_USER = EMAIL_HOST_USER
-
-
-@csrf_exempt
-def receive(request):
-    if request.method == "POST":
-        data = json.loads(request.body.decode())
-        ntf_group = Notification_group.objects.get(id=data["notification_group"])
-        ntf = Notification.objects.create()
-        ntf.title = data["title"]
-        ntf.status = data["status"]
-        ntf.url = data["url"]
-        ntf.message = data["message"]
-        ntf.created_at = data["created_at"]
-        ntf.ntf_group = ntf_group
-        ntf.recipient = data["recipient"]
-        ntf.save()
-        messages.success(request, 'Данные сохранены.')
-        return redirect('/')
-
 
 """Функция для заполнения шаблонов пользователями """
 
