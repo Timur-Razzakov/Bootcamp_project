@@ -7,7 +7,7 @@
 
 - Django
 - schedule
-- PostgresSQL
+- PostgreSQL
 - Jinja2
 - RabbitMQ
 ---
